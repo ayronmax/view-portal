@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE SP_CRIA_VISITA(IN QTD_DIAS SMALLINT)
+CREATE OR REPLACE PROCEDURE SP_CRIA_VISITA(IN QTD_DIAS SMALLINT, IN USUARIO VARCHAR(20))
 
 LANGUAGE SQL
 
@@ -24,8 +24,11 @@ BEGIN
   SET intCountDays = 1;  
   SET strCondicao1 = '*';
   
-  
-  SET strUser = SELECT TRIM(CURRENT_USER);
+  IF USUARIO = '' THEN
+     SET strUser = SELECT TRIM(CURRENT_USER);
+  ELSE
+     SET strUser = USUARIO; 
+  END IF;
   
   SET strSql = 'SELECT table_name FROM systable WHERE table_type = ''TABLE'' AND table_owner = ''';
   SET strSql = strSql || strUser;
@@ -37,8 +40,7 @@ BEGIN
   SET strTableNameExiste = TRIM(strTableName); 
      
   IF strTableNameExiste <> 'PASTA_VISITA' THEN
-     CREATE TABLE pasta_visita (numero_pasta SMALLINT, data_visita INTEGER);
-     CREATE UNIQUE INDEX pasta_visita_idx ON pasta_visita (numero_pasta, data_visita);
+     CREATE TABLE pasta_visita (numero_pasta SMALLINT, data_visita INTEGER, PRIMARY KEY (numero_pasta, data_visita));
   END IF;
   
   DEALLOCATE PREPARE stmt1;
@@ -103,4 +105,3 @@ BEGIN
      SET dataVisita = ADD_DAYS(dataAtual, intCountDays);
   END WHILE;
 END;
-
