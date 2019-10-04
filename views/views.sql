@@ -333,83 +333,67 @@ WHERE
 			  trim(repeat('0', 4-length(Cast( cadcli01. "vdclicli_num" AS CHAR( 4)))) || Cast( cadcli01. "vdclicli_num" AS CHAR( 4))) 
 			  AS INTEGER) = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = 0 );
 
-DECLARE
-SET
-    INT @codigo_cev = 0;CREATE
-    or replace VIEW VW_COMODATO AS
+DECLARE SET INT @codigo_cev = 0;
+
+CREATE or replace VIEW VW_COMODATO AS
 SELECT
-    CASE WHEN Length(
-        Cast(cevped01."vdcevpen_codcli" AS VARCHAR (6))
-    ) = 5 THEN Concat(
-        '000',
-        Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6))
-    ) ELSE CASE WHEN Length(
-        Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6))
-    ) = 6 THEN Concat(
-        '00',
-        Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6))
-    ) ELSE CASE WHEN Length(
-        Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6))
-    ) = 7 THEN Concat(
-        '0',
-        Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6))
-    ) END END END AS CODIGO_CLIENTE_ERP,
-    NULL AS CODIGO_MODELO,
-    NULL AS CODIGO_OCORRENCIA,
-    NULL AS CODIGO_SITUACAO,
-    cevped01."vdcevpen_dte" AS DATA_CEV,
-    NULL AS DATA_UTILMA_AUDITORIA,
-    cevped01."vdcevpen_dtv" AS DATA_VENCIMENTO,
-    NULL AS DESCRICAO_MODELO,
-    NULL AS FAZ_INVENTARIO,
-    NULL AS NOME_FABRICANTE,
-    NULL AS NUMERO_ATIVO,
-    cevped01."vdcevpen_nrccev" AS NUMERO_CEV,
-    NULL AS NUMERO_CEV_ITEM,
-    NULL AS PATRIMONIO_DOIS,
-    (
-        SELECT
-            cadprd01."vdprdprd_codr"
-        FROM
-            CADPRD01
-        WHERE
-            cadprd01."vdprdprd_cfam" = cast(
-                left(
-                    concat(
-                        repeat(
-                            '0',
-                            6 - length(cast(cevped01."vdcevpen_prod" as varchar(6)))
-                        ),
-                        cast(cevped01."vdcevpen_prod" as varchar(6))
-                    ),
-                    3
-                ) AS SMALLINT
-            )
-            AND cadprd01."vdprdprd_nro" = Cast(
-                right(
-                    concat(
-                        repeat(
-                            '0',
-                            6 - length(cast(cevped01."vdcevpen_prod" as varchar(6)))
-                        ),
-                        cast(cevped01."vdcevpen_prod" as varchar(6))
-                    ),
-                    3
-                ) AS SMALLINT
-            )
-    ) AS CODIGO_PRODUTO_ERP,
-    cevped01."vdcevpen_qtdprd" AS QUANTIDADE,
-    NULL AS TABELA_PRECO_REC_ID,
-    NULL AS TECNOLOGIA_UTILIZADA,
-    NULL AS TIPO_STATUS,
-    NULL AS VALOR_ITEM
+    REPEAT('0', 8 - length(Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)))) || Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)) AS CODIGO_CLIENTE_ERP,
+    NULL AS CODIGO_MODELO,
+    NULL AS CODIGO_OCORRENCIA,
+    NULL AS CODIGO_SITUACAO,
+    cevped01."vdcevpen_dte" AS DATA_CEV,
+    NULL AS DATA_UTILMA_AUDITORIA,
+    cevped01."vdcevpen_dtv" AS DATA_VENCIMENTO,
+    NULL AS DESCRICAO_MODELO,
+    NULL AS FAZ_INVENTARIO,
+    NULL AS NOME_FABRICANTE,
+    NULL AS NUMERO_ATIVO,
+    cevped01."vdcevpen_nrccev" AS NUMERO_CEV,
+    NULL AS NUMERO_CEV_ITEM,
+    NULL AS PATRIMONIO_DOIS,
+    (
+        SELECT
+            cadprd01."vdprdprd_codr"
+        FROM
+            CADPRD01
+        WHERE
+            cadprd01."vdprdprd_cfam" = cast(
+                left(
+                    concat(
+                        repeat(
+                            '0',
+                            6 - length(cast(cevped01."vdcevpen_prod" as varchar(6)))
+                        ),
+                        cast(cevped01."vdcevpen_prod" as varchar(6))
+                    ),
+                    3
+                ) AS SMALLINT
+            )
+            AND cadprd01."vdprdprd_nro" = Cast(
+                right(
+                    concat(
+                        repeat(
+                            '0',
+                            6 - length(cast(cevped01."vdcevpen_prod" as varchar(6)))
+                        ),
+                        cast(cevped01."vdcevpen_prod" as varchar(6))
+                    ),
+                    3
+                ) AS SMALLINT
+            )
+    ) AS CODIGO_PRODUTO_ERP,
+    cevped01."vdcevpen_qtdprd" AS QUANTIDADE,
+    NULL AS TABELA_PRECO_REC_ID,
+    NULL AS TECNOLOGIA_UTILIZADA,
+    NULL AS TIPO_STATUS,
+    NULL AS VALOR_ITEM
 FROM
-    CEVPED01
+    CEVPED01
 WHERE
-    (
-        cevped01."vdcevpen_nrccev" = @codigo_cev
-        OR @codigo_cev = 0
-    );
+    (
+        cevped01."vdcevpen_nrccev" = @codigo_cev
+        OR @codigo_cev = 0
+    );
 
 DECLARE SET INT @CODIGO_CONDICAO_PAGAMENTO = 0;
 CREATE
@@ -429,7 +413,6 @@ WHERE
         condpg01."vdcadpag_cod" = @CODIGO_CONDICAO_PAGAMENTO
         OR @CODIGO_CONDICAO_PAGAMENTO = 0
     );
-
 
 declare set int @pasta = 0;
 
@@ -834,148 +817,84 @@ WHERE
 DECLARE SET INT @DATA_OPERACAO = 0;
 
 CREATE
-or replace VIEW  VW_MOVIMENTO_FINANCEIRO AS
+or replace VIEW  VW_MOVIMENTO_FINANCEIRO AS
 SELECT
-    CASE WHEN Length(
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR (10))
-    ) = 5 THEN Concat(
-        '000',
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10))
-    ) = 6 THEN Concat(
-        '00',
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10))
-    ) = 7 THEN Concat(
-        '0',
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10))
-    ) = 8 THEN Cast(chdepo01."crchqdep_codcli" AS VARCHAR(10)) END END END END AS CODIGO_CLIENTE_ERP,
-    NULL AS CODIGO_PRODUTO_ERP,
-    CASE WHEN chdepo01."crchqdep_dtv" >= Cast(
-        Replace(Cast(Curdate() AS VARCHAR(10)), '-', '') AS INT
-    ) THEN chdepo01."crchqdep_dte" ELSE chdepo01."crchqdep_dtv" END AS DATA_OPERACAO,
-    chdepo01."crchqdep_dtv" AS DATA_VENCIMENTO,
-    CASE WHEN chdepo01."crchqdep_dte" = chdepo01."crchqdep_dtv" THEN 1 ELSE 2 END AS MOD,
-    Cast(chdepo01."crchqdep_ndoc" AS VARCHAR(255)) AS NUMERO_DOCUMENTO,
-    CASE WHEN chdepo01."crchqdep_dtv" >= Cast(Replace(Cast(Curdate() AS VARCHAR(10)), '-', '') AS INT) THEN '1' ELSE '2' END AS TIPO_REGISTRO,
-    chdepo01."crchqdep_nped" AS NUMERO_PEDIDO,
-    chdepo01."crchqdep_vldoc" AS VALOR
+    REPEAT('0', 8 - length(Cast(chdepo01."crchqdep_codcli" AS VARCHAR(6)))) || Cast(chdepo01."crchqdep_codcli" AS VARCHAR(6)) AS CODIGO_CLIENTE_ERP,    
+    NULL AS CODIGO_PRODUTO_ERP,
+    CASE WHEN chdepo01."crchqdep_dtv" >=CAST(DATETOSTR(Curdate()-45,'yyyymmdd') as INT)  THEN chdepo01."crchqdep_dte" ELSE chdepo01."crchqdep_dtv" END AS DATA_OPERACAO,
+    chdepo01."crchqdep_dtv" AS DATA_VENCIMENTO,
+    CASE WHEN chdepo01."crchqdep_dte" = chdepo01."crchqdep_dtv" THEN 1 ELSE 2 END AS MOD,
+    Cast(chdepo01."crchqdep_ndoc" AS VARCHAR(255)) AS NUMERO_DOCUMENTO,
+    CASE WHEN chdepo01."crchqdep_dtv" >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') as INT) THEN '1' ELSE '2' END AS TIPO_REGISTRO,
+    chdepo01."crchqdep_nped" AS NUMERO_PEDIDO,
+    chdepo01."crchqdep_vldoc" AS VALOR
 FROM
-     CHDEPO01
+     CHDEPO01
 WHERE
-    chdepo01."crchqdep_dtv" >= Cast(
-        Replace(Cast(Curdate() AS VARCHAR(10)), '-', '') AS INT
-    )
-    AND (
-        chdepo01."crchqdep_dte" = @DATA_OPERACAO
-        OR @DATA_OPERACAO = 0
-    )
+    chdepo01."crchqdep_dtv" >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') as INT)
+    AND (
+        chdepo01."crchqdep_dte" = @DATA_OPERACAO
+        OR @DATA_OPERACAO = 0
+    )
 UNION ALL
 SELECT
-    CASE WHEN Length(Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))) = 5 THEN Concat(
-        '000',
-        Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))) = 6 THEN Concat(
-        '00',
-        Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))) = 7 THEN Concat(
-        '0',
-        Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(Cast(chdev01."crchqdev_ccli" AS VARCHAR(10))) = 8 THEN Cast(chdev01."crchqdev_ccli" AS VARCHAR (10)) END END END END AS CODIGO_CLIENTE_ERP,
-    NULL AS CODIGO_PRODUTO,
-    CASE WHEN chdev01."crchqdev_dtqui" > 0 THEN chdev01."crchqdev_dtqui" ELSE 0 END AS DATA_OPERACAO,
-    chdev01."crchqdev_dtvto" AS DATA_VENCIMENTO,
-    0 AS MOD,
-    chdev01."crchqdev_nchq" AS NUMERO_DOCUMENTO,
-    '3' AS TIPO_REGISTRO,
-    chdev01."crchqdev_nped" AS NUMERO_PEDIDO,
-    chdev01."crchqdev_vlori" AS VALOR
+    REPEAT('0', 8 - length(Cast(chdev01."crchqdev_ccli" AS VARCHAR(6)))) || Cast(chdev01."crchqdev_ccli" AS VARCHAR(6)) AS CODIGO_CLIENTE_ERP,     
+    NULL AS CODIGO_PRODUTO,
+    CASE WHEN chdev01."crchqdev_dtqui" > 0 THEN chdev01."crchqdev_dtqui" ELSE 0 END AS DATA_OPERACAO,
+    chdev01."crchqdev_dtvto" AS DATA_VENCIMENTO,
+    0 AS MOD,
+    chdev01."crchqdev_nchq" AS NUMERO_DOCUMENTO,
+    '3' AS TIPO_REGISTRO,
+    chdev01."crchqdev_nped" AS NUMERO_PEDIDO,
+    chdev01."crchqdev_vlori" AS VALOR
 FROM
-     CHDEV01
+     CHDEV01
 WHERE
-    chdev01."crchqdev_dtqui" = 0
-    AND chdev01."crchqdev_dtemi" >= Cast(
-        Replace(Cast(Curdate() - 45 AS VARCHAR(10)), '-', '') AS INT
-    )
-    AND (
-        chdev01."crchqdev_dtqui" = @DATA_OPERACAO
-        OR @DATA_OPERACAO = 0
-    )
+    chdev01."crchqdev_dtqui" = 0
+    AND chdev01."crchqdev_dtemi" >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') as INT)
+    AND (
+        chdev01."crchqdev_dtqui" = @DATA_OPERACAO
+        OR @DATA_OPERACAO = 0
+    )
+UNION ALL
+SELECT    
+   REPEAT('0', 8 - length(Cast(cadbai01."crmovbai_ccli"  AS VARCHAR(6)))) || Cast(cadbai01."crmovbai_ccli" AS VARCHAR(6)) AS CODIGO_CLIENTE_ERP,      
+    NULL AS CODIGO_PRODUTO,
+    cadbai01."crmovbai_dtp" AS DATA_OPERACAO,
+    cadbai01."crmovbai_dtv" AS DATA_VENCIMENTO,
+    cadbai01."crmovbai_mod" AS MOD,
+    cadbai01."crmovbai_ndupl" AS NUMERO_DOCUMENTO,
+    '2' AS TIPO_REGISTRO,
+    cadbai01."crmovbai_nped" AS NUMERO_PEDIDO,
+    cadbai01."crmovbai_valor" AS VALOR
+FROM
+     CADBAI01
+WHERE
+   cadbai01."crmovbai_dtp" >=  CAST(DATETOSTR(Curdate()-45,'yyyymmdd') as INT) 
+    AND (
+        cadbai01."crmovbai_dtp" = @DATA_OPERACAO
+        OR @DATA_OPERACAO = 0
+    )
 UNION ALL
 SELECT
-    CASE WHEN Length(
-        Cast(cadbai01."crmovbai_ccli" AS VARCHAR (10))
-    ) = 5 THEN Concat(
-        '000',
-        Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10))) = 6 THEN Concat(
-        '00',
-        Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10))
-    ) = 7 THEN Concat(
-        '0',
-        Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10))
-    ) = 8 THEN Cast(cadbai01."crmovbai_ccli" AS VARCHAR(10)) END END END END AS CODIGO_CLIENTE_ERP,
-    NULL AS CODIGO_PRODUTO,
-    cadbai01."crmovbai_dtp" AS DATA_OPERACAO,
-    cadbai01."crmovbai_dtv" AS DATA_VENCIMENTO,
-    cadbai01."crmovbai_mod" AS MOD,
-    cadbai01."crmovbai_ndupl" AS NUMERO_DOCUMENTO,
-    '2' AS TIPO_REGISTRO,
-    cadbai01."crmovbai_nped" AS NUMERO_PEDIDO,
-    cadbai01."crmovbai_valor" AS VALOR
+REPEAT('0', 8 - length(Cast(cadmov01."crmovmov_ccli"  AS VARCHAR(6)))) || Cast(cadmov01."crmovmov_ccli" AS VARCHAR(6)) AS CODIGO_CLIENTE_ERP,          
+    NULL AS CODIGO_PRODUTO,
+    cadmov01."crmovmov_dte" AS DATA_OPERACAO,
+    cadmov01."crmovmov_dtv" AS DATA_VENCIMENTO,
+    cadmov01."crmovmov_mod" AS MOD,
+    cadmov01."crmovmov_ndupl" AS NUMERO_DOCUMENTO,
+    '1' AS TIPO_REGISTRO,
+    cadmov01."crmovmov_nped" AS NUMERO_PEDIDO,
+    cadmov01."crmovmov_valor" AS VALOR
 FROM
-     CADBAI01
+     CADMOV01
 WHERE
-    cadbai01."crmovbai_dtp" >= Cast(
-        Replace(Cast(Curdate() - 45 AS VARCHAR(10)), '-', '') AS INT
-    )
-    AND (
-        cadbai01."crmovbai_dtv" = @DATA_OPERACAO
-        OR @DATA_OPERACAO = 0
-    )
-UNION ALL
-SELECT
-    CASE WHEN Length(
-        Cast(cadmov01."crmovmov_ccli" AS VARCHAR (10))
-    ) = 5 THEN Concat(
-        '000',
-        Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10))) = 6 THEN Concat(
-        '00',
-        Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10))
-    ) = 7 THEN Concat(
-        '0',
-        Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10))
-    ) ELSE CASE WHEN Length(
-        Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10))
-    ) = 8 THEN Cast(cadmov01."crmovmov_ccli" AS VARCHAR(10)) END END END END AS CODIGO_CLIENTE_ERP,
-    NULL AS CODIGO_PRODUTO,
-    cadmov01."crmovmov_dte" AS DATA_OPERACAO,
-    cadmov01."crmovmov_dtv" AS DATA_VENCIMENTO,
-    cadmov01."crmovmov_mod" AS MOD,
-    cadmov01."crmovmov_ndupl" AS NUMERO_DOCUMENTO,
-    '1' AS TIPO_REGISTRO,
-    cadmov01."crmovmov_nped" AS NUMERO_PEDIDO,
-    cadmov01."crmovmov_valor" AS VALOR
-FROM
-     CADMOV01
-WHERE
-    (
-        cadmov01."crmovmov_dte" = @DATA_OPERACAO
-        OR @DATA_OPERACAO = 0
-    )
+    (
+        cadmov01."crmovmov_dte" = @DATA_OPERACAO
+        OR @DATA_OPERACAO = 0
+    )
 ORDER BY
-    3;
+    3;
 
 DECLARE SET VARCHAR(255) @CODIGO_OCORRENCIA ='';
 
@@ -1435,84 +1354,174 @@ WHERE
 CREATE
 or replace VIEW  VW_RESTRICAO_COMERCIAL_ITEM AS
 SELECT
-    grptab01."vdtabgrc_tab01" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab01 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab01 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO 
 WHERE
-    grptab01."vdtabgrc_tab01" <> 0
+    vdtabgrc_tab01 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab02" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab02 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab02 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab02" <> 0
+    vdtabgrc_tab02 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab03" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab03 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab03 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab03" <> 0
+    vdtabgrc_tab03 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab04" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab04 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab04 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab04" <> 0
+    vdtabgrc_tab04 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab05" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab05 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab05 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab05" <> 0
+    vdtabgrc_tab05 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab06" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab06 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab06 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab06" <> 0
+    vdtabgrc_tab06 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab07" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab07 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab07 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab07" <> 0
+    vdtabgrc_tab07 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab08" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab08 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab08 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab08" <> 0
+    vdtabgrc_tab08 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab09" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab09 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab09 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab09" <> 0
+    vdtabgrc_tab09 <> 0
 UNION
 SELECT
-    grptab01."vdtabgrc_tab10" AS CODIGO_TABELA_PRECO,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+    TABELA_CARGA_PEDIDO || 
+    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab10 AS VARCHAR(2)))) || 
+    CAST(vdtabgrc_tab10 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
+    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
 FROM
      GRPTAB01
+CROSS JOIN 
+     (SELECT  
+          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
+          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
+          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
+       FROM 
+          PAROCO01) PAROCO
 WHERE
-    grptab01."vdtabgrc_tab10" <> 0;
+    vdtabgrc_tab10 <> 0;
 
 declare set varchar(255) @codigo_restricao = '';
 
