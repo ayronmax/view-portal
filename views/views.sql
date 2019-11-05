@@ -393,7 +393,7 @@ WHERE
     (
         cevped01."vdcevpen_nrccev" = @codigo_cev
         OR @codigo_cev = 0
-    );
+    );Grato
 
 DECLARE SET INT @CODIGO_CONDICAO_PAGAMENTO = 0;
 CREATE
@@ -3499,46 +3499,47 @@ AS
          END GRP_ESCALONADO 
   FROM    bdaseq01 ;
   
-  
-declare set int @CODIGO_BANDA = 0;
+declare set bigint @CODIGO_BANDA = 0;
 
-CREATE OR REPLACE VIEW VW_BANDA_PRECO_CAPA AS
 SELECT DISTINCT
-  1 ATIVO,
-  B.vdprdbda_id CODIGO_BANDA_PRECO_ERP,
-  NULL CODIGO_FAMEB,
-  B.vdprdbda_grpcli CODIGO_GRUPO_ANALISE_CLI,
-  B.vdprdbda_grpcan CODIGO_GRUPO_CANAL_CLI,
-  B.vdprdbda_pst CODIGO_PASTA_CLI,
-  NULL DESCRICAO,
-  CASE WHEN B.vdprdbda_importado = 'S' THEN 'IMPORTADO' ELSE 'MANUAL' END ORIGEM_BANDA,
-  B.vdprdbda_reg REGIAO_CLIENTE,
-  B.vdprdbda_caixa_unid UNIDADE,
-  B.vdprdbda_can CODIGO_CANAL_ERP,
-  B.vdprdbda_cat CODIGO_CATEGORIA_PRODUTO_ERP,
-  B.vdprdbda_fam CODIGO_FAMILIA_PRODUTO_ERP,
-  B.vdprdbda_grp CODIGO_GRUPO_PRODUTO_ERP,
-  B.vdprdbda_mar CODIGO_MARCA_PRODUTO_ERP,
-  B.VDPRDBDA_GRPESC grupo_escalonado,
-  (SELECT vdprdprd_codr FROM CADPRD01 WHERE vdprdprd_cfam = B.vdprdbda_fam AND vdprdprd_nro = B.vdprdbda_prd) CODIGO_PRODUTO_ERP,
-  B.vdprdbda_cpg CODIGO_CONDICAO_PAGAMENTO_ERP, 
-  A.SEQUENCIA SEQUENCIA
-FROM
-  VW_SEQ_BANDA_PRECO A, BDAPRE01 B
-WHERE
-   A.FAMILIA = CASE WHEN (B.VDPRDBDA_FAM = NULL OR  B.VDPRDBDA_FAM = 0) THEN 0 ELSE 1 END AND
-   A.PRODUTO = CASE WHEN (B.VDPRDBDA_PRD = NULL OR  B.VDPRDBDA_PRD = 0) THEN 0 ELSE 1 END AND
-   A.GRUPO = CASE WHEN (B.VDPRDBDA_GRP = NULL OR B.VDPRDBDA_GRP = 0) THEN 0 ELSE 1 END AND
-   A.CATEGORIA = CASE WHEN (B.VDPRDBDA_CAT = NULL OR B.VDPRDBDA_CAT = 0) THEN 0 ELSE 1 END AND 
-   A.MARCA = CASE WHEN (B.VDPRDBDA_MAR = NULL OR bdapre01.VDPRDBDA_MAR = 0) THEN 0 ELSE 1 END AND
-   A.GRUPO_CLIENTE = CASE WHEN (B.VDPRDBDA_GRPCLI = NULL OR B.VDPRDBDA_GRPCLI = 0) THEN 0 ELSE 1 END AND 
-   A.VENDEDOR = CASE WHEN (B.VDPRDBDA_VEN = NULL OR B.VDPRDBDA_VEN = '') THEN 0 ELSE 1 END AND
-   A.GRUPO_CANAL = CASE WHEN (B.VDPRDBDA_CAN = NULL OR B.VDPRDBDA_CAN = '') THEN 0 ELSE 1 END AND
-   A.COND_PAGTO = CASE WHEN (B.VDPRDBDA_CPG = NULL OR B.VDPRDBDA_CPG = 0) THEN 0 ELSE 1 END AND 
-   A.GRP_ESCALONADO = CASE WHEN (B.VDPRDBDA_GRPESC = NULL OR B.VDPRDBDA_GRPESC = 0) THEN 0 ELSE 1 END AND
-   B.vdprdbda_cancsn = 0 AND 
-   (B.vdprdbda_id = @codigo_banda OR @codigo_banda = 0);
-						
+    1 ATIVO, 
+    B.vdprdbda_id CODIGO_BANDA_PRECO_ERP, 
+    NULL CODIGO_FAMEB, 
+    B.vdprdbda_grpcli CODIGO_GRUPO_ANALISE_CLI, 
+    B.vdprdbda_grpcan CODIGO_GRUPO_CANAL_CLI, 
+    B.vdprdbda_pst CODIGO_PASTA_CLI, 
+    NULL DESCRICAO, 
+    CASE WHEN B.vdprdbda_importado = 'S' THEN 'IMPORTADO' ELSE 'MANUAL' END ORIGEM_BANDA, 
+    CASE WHEN C.VDPAROCO_REG_PASTA_BANDPREC = 1 THEN B.vdprdbda_reg ELSE 0 END REGIAO_CLIENTE,
+    CASE WHEN C.VDPAROCO_REG_PASTA_BANDPREC = 2 THEN B.vdprdbda_reg ELSE 0 END NUMERO_PASTA,
+    CASE WHEN C.VDPAROCO_REG_PASTA_BANDPREC = 3 THEN B.vdprdbda_reg ELSE 0 END GRUPO_CLIENTE, 
+    B.vdprdbda_caixa_unid UNIDADE, 
+    CASE WHEN C.VDPAROCO_CAN_GRPCAN_BANDPREC = 1 THEN B.vdprdbda_can ELSE '' END CODIGO_CANAL_ERP,
+    CASE WHEN C.VDPAROCO_CAN_GRPCAN_BANDPREC = 2 THEN B.vdprdbda_can ELSE '' END CODIGO_GRUPO_CANAL_ERP,
+    B.vdprdbda_cat CODIGO_CATEGORIA_PRODUTO_ERP, 
+    B.vdprdbda_fam CODIGO_FAMILIA_PRODUTO_ERP, 
+    B.vdprdbda_grp CODIGO_GRUPO_PRODUTO_ERP, 
+    B.vdprdbda_mar CODIGO_MARCA_PRODUTO_ERP, 
+    CASE WHEN C.VDPAROCO_BDA_VEN_SUP_GER = 1 THEN B.vdprdbda_ven ELSE '' END CODIGO_VENDEDOR_ERP, 
+    B.vdprdbda_grpesc grupo_escalonado, 
+    (SELECT vdprdprd_codr FROM cadprd01 WHERE vdprdprd_cfam = B.vdprdbda_fam AND vdprdprd_nro = B.vdprdbda_prd) CODIGO_PRODUTO_ERP, 
+    B.vdprdbda_cpg CODIGO_CONDICAO_PAGAMENTO_ERP, 
+    A.sequencia SEQUENCIA 
+  FROM 
+    vw_seq_banda_preco A, bdapre01 B, PAROCO01 C 
+  WHERE
+    A.familia = CASE WHEN (B.vdprdbda_fam = NULL OR B.vdprdbda_fam = 0) THEN 0 ELSE 1  end AND
+    A.produto = CASE WHEN (B.vdprdbda_prd = NULL OR B.vdprdbda_prd = 0) THEN 0 ELSE 1 end AND
+    A.grupo = CASE WHEN (B.vdprdbda_grp = NULL OR B.vdprdbda_grp = 0) THEN 0 ELSE 1 end AND
+    A.categoria = CASE WHEN (B.vdprdbda_cat = NULL OR B.vdprdbda_cat = 0) THEN 0 ELSE 1 end AND
+    A.marca = CASE WHEN (B.vdprdbda_mar = NULL OR bdapre01.vdprdbda_mar = 0) THEN 0 ELSE 1 end AND
+    A.grupo_cliente = CASE WHEN (B.vdprdbda_grpcli = NULL OR B.vdprdbda_grpcli = 0) THEN 0 ELSE 1 end AND
+    A.vendedor = CASE WHEN (B.vdprdbda_ven = NULL OR B.vdprdbda_ven = '') THEN 0 ELSE 1 end AND
+    A.grupo_canal = CASE WHEN (B.vdprdbda_can = NULL OR B.vdprdbda_can = '') THEN 0 ELSE 1 end AND
+    A.cond_pagto = CASE WHEN (B.vdprdbda_cpg = NULL OR B.vdprdbda_cpg = 0) THEN 0 ELSE 1 end AND
+    A.grp_escalonado = CASE WHEN (B.vdprdbda_grpesc = NULL OR B.vdprdbda_grpesc = 0) THEN 0 ELSE 1 end AND
+    B.vdprdbda_cancsn = 0 AND
+    (B.vdprdbda_id = @codigo_banda OR @codigo_banda = 0); 						
 
 CREATE OR REPLACE VIEW VW_DADOS_VDPEDFLC AS
 SELECT 
