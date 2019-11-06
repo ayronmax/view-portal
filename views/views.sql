@@ -21,18 +21,16 @@ AS
 DECLARE SET INTEGER @CODIGO_BANDA = 0;
 
 CREATE OR replace VIEW  vw_banda_preco_item AS
-SELECT DISTINCT(bdapre01. "vdprdbda_id" )                   AS CODIGO_BANDA_PRECO_ERP,
-                bdapre01.vdprdbda_bandprec_1                AS QUANTIDADE , 
-                bdapre01.vdprdbda_tab_x_1                   AS CODIGO_TABPRECO_ERP, 
-                bdapre01.vdprdbda_descto_1                  AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_1" <> 0 
+SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
+                bdapre01.vdprdbda_bandprec_1 AS QUANTIDADE , 
+                bdapre01.vdprdbda_tab_x_1    AS CODIGO_TABPRECO_ERP, 
+                bdapre01.vdprdbda_descto_1   AS DESCONTO_MAXIMO 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_1 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_1 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_1 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_1" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
@@ -43,14 +41,12 @@ SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
                 bdapre01.vdprdbda_bandprec_2 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_2    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_2   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_2" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_2 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_2 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_2 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_2" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
@@ -61,14 +57,12 @@ SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
                 bdapre01.vdprdbda_bandprec_3 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_3    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_3   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_3" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_3 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_3 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_3 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_3" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
@@ -79,51 +73,44 @@ SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
                 bdapre01.vdprdbda_bandprec_4 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_4    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_4   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_4" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_4 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_4 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_4 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_4" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
 AND             LEFT(Cast( tabprc01.vdtabprd_dtvgf AS VARCHAR(8)),4 )>= LEFT(Cast(Curdate() - 365 AS CHAR(4)),4)
 UNION ALL 
-SELECT     bdapre01. "vdprdbda_id"      AS CODIGO_BANDA_PRECO_ERP, 
-           bdapre01.vdprdbda_bandprec_5 AS QUANTIDADE , 
-           bdapre01.vdprdbda_tab_x_5    AS CODIGO_TABPRECO_ERP, 
-           bdapre01.vdprdbda_descto_5   AS DESCONTO_MAXIMO 
-FROM        bdapre01 
-INNER JOIN  tabprc01 
-ON         bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND        bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN  cadprd01 
-ON         bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND        bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE      cadprd01. "vdprdprd_flag" = 'A' 
-AND        bdapre01. "vdprdbda_bandprec_5" <> 0 
-AND        bdapre01. "vdprdbda_cancsn" = 0 
-AND        ( 
-                      bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
-           OR         @CODIGO_BANDA = 0 ) 
-AND        LEFT(Cast( tabprc01.vdtabprd_dtvgf AS VARCHAR(8)),4 )>= LEFT(Cast(Curdate() - 365 AS CHAR(4)),4)
+SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP, 
+                bdapre01.vdprdbda_bandprec_5 AS QUANTIDADE , 
+                bdapre01.vdprdbda_tab_x_5    AS CODIGO_TABPRECO_ERP, 
+                bdapre01.vdprdbda_descto_5   AS DESCONTO_MAXIMO 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_5 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_5 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_5 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_5" <> 0 
+AND             bdapre01. "vdprdbda_cancsn" = 0 
+AND             ( 
+                                bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
+                OR              @CODIGO_BANDA = 0 ) 
+AND             LEFT(Cast( tabprc01.vdtabprd_dtvgf AS VARCHAR(8)),4 )>= LEFT(Cast(Curdate() - 365 AS CHAR(4)),4)
 UNION ALL 
 SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP, 
                 bdapre01.vdprdbda_bandprec_6 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_6    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_6   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_6" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_6 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_6 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_6 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_6" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
@@ -134,14 +121,12 @@ SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
                 bdapre01.vdprdbda_bandprec_7 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_7    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_7   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_7" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_7 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_7 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_7 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_7" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
@@ -152,14 +137,12 @@ SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
                 bdapre01.vdprdbda_bandprec_8 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_8    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_8   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_8" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_8 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_8 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_8 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_8" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
@@ -170,19 +153,17 @@ SELECT DISTINCT(bdapre01. "vdprdbda_id" )    AS CODIGO_BANDA_PRECO_ERP,
                 bdapre01.vdprdbda_bandprec_9 AS QUANTIDADE , 
                 bdapre01.vdprdbda_tab_x_9    AS CODIGO_TABPRECO_ERP, 
                 bdapre01.vdprdbda_descto_9   AS DESCONTO_MAXIMO 
-FROM             bdapre01 
-INNER JOIN       tabprc01 
-ON              bdapre01. "vdprdbda_fam" = tabprc01. "vdtabprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = tabprc01. "vdtabprd_nro" 
-INNER JOIN       cadprd01 
-ON              bdapre01. "vdprdbda_fam" = cadprd01. "vdprdprd_cfam" 
-AND             bdapre01. "vdprdbda_prd" = cadprd01. "vdprdprd_nro" 
-WHERE            bdapre01. "vdprdbda_bandprec_9" <> 0 
+FROM            bdapre01 
+INNER JOIN      tabprc01 
+ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_9 AS  VARCHAR(8)), 1,4 ) AS INT)
+AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_9 AS  VARCHAR(8)), 5,2 ) AS INT)
+AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_9 AS VARCHAR(8)), 7,2 ) AS INT)
+WHERE           bdapre01. "vdprdbda_bandprec_9" <> 0 
 AND             bdapre01. "vdprdbda_cancsn" = 0 
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
-AND             LEFT(Cast( tabprc01.vdtabprd_dtvgf AS VARCHAR(8)),4 )>= LEFT(Cast(Curdate() - 365 AS CHAR(4)),4) ;
+AND             LEFT(Cast( tabprc01.vdtabprd_dtvgf AS VARCHAR(8)),4 )>= LEFT(Cast(Curdate() - 365 AS CHAR(4)),4);
 
 CREATE OR replace VIEW  vw_banda_preco_rest 
 AS 
