@@ -40,7 +40,11 @@ BEGIN
   SET strTableNameExiste = TRIM(strTableName); 
      
   IF strTableNameExiste <> 'PASTA_VISITA' THEN
-     CREATE TABLE pasta_visita (numero_pasta SMALLINT, data_visita INTEGER, PRIMARY KEY (numero_pasta, data_visita));
+     SET strSql = 'CREATE TABLE ' || strUser || '.pasta_visita (numero_pasta SMALLINT, data_visita INTEGER, PRIMARY KEY (numero_pasta, data_visita))';
+     EXECUTE IMMEDIATE strSql;
+  ELSE
+     SET strSql = 'DELETE FROM ' || strUser || '.pasta_visita';
+     EXECUTE IMMEDIATE strSql;   
   END IF;
   
   DEALLOCATE PREPARE stmt1;
