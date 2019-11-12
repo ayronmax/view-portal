@@ -1201,10 +1201,12 @@ FROM
     INNER JOIN  PAROCO01 ON tabprc01."vdtabprd_ano" = PAROCO01."VDPAROCO_ANOTAB_CARGA"
     AND tabprc01."vdtabprd_mes" = PAROCO01."VDPAROCO_MESTAB_CARGA"
 WHERE	 
-    (
+    (		
         cadprd01."VDPRDPRD_CODR" = @COD_PRODUTO
         OR @COD_PRODUTO = 0
     )
+	AND cadprd01."VDPRDPRD_DISP_PORTAL_WEB" = 1	
+	AND tabprc01."vdtabprd_preco" <> 0
     AND (
         Cast(
             Cast(
