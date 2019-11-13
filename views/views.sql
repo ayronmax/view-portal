@@ -2017,22 +2017,7 @@ WHERE
 
 DECLARE SET VARCHAR(255) @CODIGO_VENDEDOR = '';
 
-CREATE
-or replace VIEW  VW_VENDEDOR AS
-SELECT
-    1 AS ATIVO,
-    cadven01."vdvenven_sigla" AS CODIGO_VENDEDOR_ERP,
-    cadven01."vdvenven_nome" AS NOME,
-    cadven01."vdvenven_ddd" AS TELEFONE_DD,
-    cadven01."vdvenven_tel" AS TELEFONE_TRONCO,
-    cast(cadven01."vdvenven_nivel" as varchar(1)) AS TIPO
-FROM
-     CADVEN01
-WHERE
-    (
-        cadven01."vdvenven_sigla" = @CODIGO_VENDEDOR
-        OR @CODIGO_VENDEDOR = ''
-    );
+CREATE or replace VIEW  VW_VENDEDOR AS SELECT 1 AS ATIVO, cadven01. "vdvenven_sigla" AS CODIGO_VENDEDOR_ERP, cadven01. "vdvenven_nome" AS NOME, cadven01. "vdvenven_ddd" AS TELEFONE_DD, cadven01. "vdvenven_tel" AS TELEFONE_TRONCO, cast(cadven01. "vdvenven_nivel" as varchar(1)) AS TIPO, cadven01. "vdvenven_tpven" AS TIPO_VENDA FROM  CADVEN01 WHERE ( cadven01. "vdvenven_sigla" = @CODIGO_VENDEDOR OR @CODIGO_VENDEDOR = '' );
     
 
 declare set varchar(255) @CODIGO_CLIENTE = '';
