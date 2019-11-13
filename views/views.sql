@@ -1300,211 +1300,57 @@ where(
 
 CREATE
 or replace VIEW  VW_RESTRICAO_COMERCIAL_CAPA AS
-SELECT
-    CASE WHEN grptab01."vdtabgrc_cancsn" = 0 THEN 1 ELSE 0 END AS ATIVO,
-    grptab01."vdtabgrc_grpcan" AS CODIGO_GRUPO_CANAL_ERP,
-    grptab01."vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP,
-    grptab01."vdtabgrc_divcan" AS DIVISAO_CANAL,
-    grptab01."vdtabgrc_valminped" AS VALOR_MINIMO_PEDIDO,
-    grptab01."vdtabgrc_canal" AS CODIGO_CANAL_ERP,
-    CASE WHEN Length(
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) = 5 THEN Concat(
-        '000',
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) ELSE CASE WHEN Length(
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) = 6 THEN Concat(
-        '00',
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) ELSE CASE WHEN Length(
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) = 7 THEN Concat(
-        '0',
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) ELSE CASE WHEN Length(
-        Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8))
-    ) = 8 THEN Cast(grptab01."vdtabgrc_cliente" AS VARCHAR (8)) END END END END AS CODIGO_CLIENTE_ERP,
-    grptab01."vdtabgrc_condpag" AS CODIGO_CONDICAO_PAGAMENTO_ERP,
-    grptab01."vdtabgrc_tipcobr" AS CODIGO_TIPO_COBRANCA_ERP,
-    VDTABGRC_VENDED CODIGO_VENDEDOR,
-    VDTABGRC_GRPANALISE CODIGO_GRUPO_ANALISE
-FROM
-     GRPTAB01
-WHERE
-    Cast(grptab01."vdtabgrc_cliente" AS VARCHAR(8)) <> '0';
+SELECT CASE WHEN grptab01. "vdtabgrc_cancsn" = 0 THEN 1 ELSE 0 END AS ATIVO, grptab01. "vdtabgrc_grpcan" AS CODIGO_GRUPO_CANAL_ERP, grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP, grptab01. "vdtabgrc_divcan" AS DIVISAO_CANAL, grptab01. "vdtabgrc_valminped" AS VALOR_MINIMO_PEDIDO, grptab01. "vdtabgrc_canal" AS CODIGO_CANAL_ERP, CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 5 THEN Concat( '000', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 6 THEN Concat( '00', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 7 THEN Concat( '0', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 8 THEN Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR (8)) END END END END AS CODIGO_CLIENTE_ERP, grptab01. "vdtabgrc_condpag" AS CODIGO_CONDICAO_PAGAMENTO_ERP, grptab01. "vdtabgrc_tipcobr" AS CODIGO_TIPO_COBRANCA_ERP, VDTABGRC_VENDED CODIGO_VENDEDOR, VDTABGRC_GRPANALISE CODIGO_GRUPO_ANALISE FROM  GRPTAB01;
 
-CREATE
-or replace VIEW  VW_RESTRICAO_COMERCIAL_ITEM AS
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab01 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab01 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO 
-WHERE
-    vdtabgrc_tab01 <> 0
+CREATE or replace VIEW  VW_RESTRICAO_COMERCIAL_ITEM AS 
+SELECT grptab01. "vdtabgrc_tab01" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab01" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab02 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab02 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab02 <> 0
+SELECT grptab01. "vdtabgrc_tab02" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab02" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab03 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab03 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab03 <> 0
+SELECT grptab01. "vdtabgrc_tab03" AS CODIGO_TABELA_PRECO,
+              grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab03" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab04 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab04 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab04 <> 0
+SELECT grptab01. "vdtabgrc_tab04" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab04" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab05 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab05 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab05 <> 0
+SELECT grptab01. "vdtabgrc_tab05" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab05" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab01 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab01 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab01 <> 0
+SELECT grptab01. "vdtabgrc_tab06" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001. GRPTAB01
+WHERE grptab01. "vdtabgrc_tab06" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab07 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab07 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab07 <> 0
+SELECT grptab01. "vdtabgrc_tab07" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab07" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab08 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab08 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab08 <> 0
+SELECT grptab01. "vdtabgrc_tab08" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab08" <> 0
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab09 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab09 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab09 <> 0
+SELECT grptab01. "vdtabgrc_tab09" AS CODIGO_TABELA_PRECO,
+       grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+FROM DBCONTROL2016001.GRPTAB01
+WHERE grptab01. "vdtabgrc_tab09" <> 0 
 UNION
-SELECT
-    TABELA_CARGA_PEDIDO || 
-    REPEAT('0',2-LENGTH(CAST(vdtabgrc_tab10 AS VARCHAR(2)))) || 
-    CAST(vdtabgrc_tab10 AS VARCHAR(2)) CODIGO_TABELA_PRECO,
-    vdtabgrc_seq CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM
-     GRPTAB01
-CROSS JOIN 
-     (SELECT  
-          CAST(VDPAROCO_ANOTAB_CARGA AS VARCHAR(4)) ||
-          REPEAT('0',2-LENGTH(CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)))) ||
-          CAST(VDPAROCO_MESTAB_CARGA AS VARCHAR(4)) TABELA_CARGA_PEDIDO 
-       FROM 
-          PAROCO01) PAROCO
-WHERE
-    vdtabgrc_tab10 <> 0;
+  SELECT grptab01. "vdtabgrc_tab10" AS CODIGO_TABELA_PRECO,
+         grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
+  FROM DBCONTROL2016001.GRPTAB01 WHERE grptab01. "vdtabgrc_tab10" <> 0 ;
 
 declare set varchar(255) @codigo_restricao = '';
 
