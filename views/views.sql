@@ -2104,7 +2104,7 @@ SELECT
             Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
         ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
     ) AS CODIGO_CLIENTE_ERP,
-	1 as VENDEDOR,
+	2 as VENDEDOR,
     cadcli01."vdclicli_ven2" AS CODIGO_VENDEDOR_ERP,
     VDCLICLI_CODPASTA2 PASTA_VISITA
 FROM
@@ -2160,7 +2160,7 @@ SELECT
             Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
         ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
     ) AS CODIGO_CLIENTE_ERP,
-	1 as VENDEDOR,
+	3 as VENDEDOR,
     cadcli01."vdclicli_ven3" AS CODIGO_VENDEDOR_ERP,
     VDCLICLI_CODPASTA3 PASTA_VISITA
 FROM
@@ -2216,7 +2216,7 @@ SELECT
             Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
         ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
     ) AS CODIGO_CLIENTE_ERP,
-	1 as VENDEDOR,
+	4 as VENDEDOR,
     cadcli01."vdclicli_ven4" AS CODIGO_VENDEDOR_ERP,
     VDCLICLI_CODPASTA4 PASTA_VISITA
 FROM
@@ -2272,7 +2272,7 @@ SELECT
             Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
         ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
     ) AS CODIGO_CLIENTE_ERP,
-	1 as VENDEDOR,
+	5 as VENDEDOR,
     cadcli01."vdclicli_ven5" AS CODIGO_VENDEDOR_ERP,
     VDCLICLI_CODPASTA5 PASTA_VISITA
 FROM
@@ -3525,10 +3525,8 @@ SELECT
          VDCLIGMP_CANAL2
        WHEN VDCLIGMP_SELECAO = 4 THEN
          CAST(VDCLIGMP_GRPANALISE2 AS VARCHAR(4))
-       WHEN VDCLIGMP_SELECAO = 5 THEN 
-         ''
-       WHEN VDCLIGMP_SELECAO = 6 THEN 
-         ''
+       WHEN VDCLIGMP_SELECAO = 5 THEN ''
+       WHEN VDCLIGMP_SELECAO = 6 THEN ''
        WHEN VDCLIGMP_SELECAO = 7 THEN
          CAST(VDCLIGMP_CODPRD2 AS VARCHAR(6))
        WHEN VDCLIGMP_SELECAO = 8 THEN
