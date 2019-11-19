@@ -18,6 +18,8 @@ BEGIN
   DECLARE strTableName VARCHAR(15);
   DECLARE strTableNameExiste VARCHAR(15);
   DECLARE strDataVisita VARCHAR(10);
+  DECLARE intFrequencia SMALLINT;
+  DECLARE strFrequencia CHAR(1);
   
   SET dataAtual = CURDATE();
   SET dataVisita = dataAtual;
@@ -40,7 +42,7 @@ BEGIN
   SET strTableNameExiste = TRIM(strTableName); 
      
   IF strTableNameExiste <> 'PASTA_VISITA' THEN
-     SET strSql = 'CREATE TABLE ' || strUser || '.pasta_visita (numero_pasta SMALLINT, data_visita INTEGER, PRIMARY KEY (numero_pasta, data_visita))';
+     SET strSql = 'CREATE TABLE ' || strUser || '.pasta_visita (numero_pasta SMALLINT, data_visita INTEGER, frequencia CHAR(1), PRIMARY KEY (numero_pasta, data_visita))';
      EXECUTE IMMEDIATE strSql;
   ELSE
      SET strSql = 'DELETE FROM ' || strUser || '.pasta_visita';
@@ -75,7 +77,7 @@ BEGIN
      
      SET strNomeCampo = 'VDCLIPAS_V_' || CAST(intMes AS VARCHAR(2)) || '_' || CAST(intDia AS VARCHAR(2));     
           
-     SET strSql = 'SELECT vdclipas_num FROM ';
+     SET strSql = 'SELECT vdclipas_num, vdclipas_freq FROM ';
      SET strSql = strSql || strNomeTabela;
      SET strSql = strSql || ' WHERE ';
      SET strSql = strSql || strNomeCampo;
@@ -86,9 +88,19 @@ BEGIN
      PREPARE stmt3 FROM strSql;
      DECLARE cursor1 CURSOR FOR stmt3;
      OPEN cursor1;
-     FETCH cursor1 INTO intPasta; 
+     FETCH cursor1 INTO intPasta, intFrequencia; 
           
      WHILE intPasta <> NULL DO
+        IF intFrequencia = 1 THEN
+           SET strFrequencia = 'S';
+        ELSEIF intFrequencia >= 14 AND intFrequencia <= 15 THEN
+           SET strFrequencia = 'Q';
+        ELSEIF intFrequencia >= 28 AND intFrequencia <= 31 THEN        
+           SET strFrequencia = 'M';
+        ELSE
+           SET strFrequencia = 'X';    
+        END IF; 
+            
         SET strSql = 'INSERT OR REPLACE INTO '      ||
                      strUser                        ||
                      '.pasta_visita VALUES ('       ||
@@ -97,9 +109,11 @@ BEGIN
                      SUBSTRING(strDataVisita, 1, 4) ||
                      SUBSTRING(strDataVisita, 6, 2) ||
                      SUBSTRING(strDataVisita, 9, 2) ||
-                     ')';        
+                     ', '''                         ||
+                     strFrequencia                  ||
+                     ''')';        
         EXECUTE IMMEDIATE strSql;
-        FETCH NEXT FROM cursor1 INTO intPasta;
+        FETCH NEXT FROM cursor1 INTO intPasta, intFrequencia;
      END WHILE;
      
      DEALLOCATE PREPARE stmt3;		
