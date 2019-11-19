@@ -3325,14 +3325,31 @@ SELECT DISTINCT
     B.vdprdbda_cpg CODIGO_CONDICAO_PAGAMENTO_ERP, 
     A.sequencia SEQUENCIA 
   FROM 
-    vw_seq_banda_preco A, bdapre01 B, PAROCO01 C 
+    (SELECT 
+       * 
+     FROM 
+       vw_seq_banda_preco 
+     WHERE 
+       FAMILIA        = 1 OR 
+       PRODUTO        = 1 OR 
+       GRUPO          = 1 OR 
+       CATEGORIA      = 1 OR
+       MARCA          = 1 OR
+       GRUPO_CLIENTE  = 1 OR 
+       VENDEDOR       = 1 OR
+       GRUPO_CANAL    = 1 OR 
+       COND_PAGTO     = 1 OR
+       GRP_ESCALONADO = 1
+    ) A,
+    bdapre01 B,
+    PAROCO01 C 
   WHERE
     A.familia = CASE WHEN (B.vdprdbda_fam = NULL OR B.vdprdbda_fam = 0) THEN 0 ELSE 1  end AND
     A.produto = CASE WHEN (B.vdprdbda_prd = NULL OR B.vdprdbda_prd = 0) THEN 0 ELSE 1 end AND
     A.grupo = CASE WHEN (B.vdprdbda_grp = NULL OR B.vdprdbda_grp = 0) THEN 0 ELSE 1 end AND
     A.categoria = CASE WHEN (B.vdprdbda_cat = NULL OR B.vdprdbda_cat = 0) THEN 0 ELSE 1 end AND
     A.marca = CASE WHEN (B.vdprdbda_mar = NULL OR bdapre01.vdprdbda_mar = 0) THEN 0 ELSE 1 end AND
-    A.grupo_cliente = CASE WHEN (B.vdprdbda_grpcli = NULL OR B.vdprdbda_grpcli = 0) THEN 0 ELSE 1 end AND
+    A.grupo_cliente = CASE WHEN (B.vdprdbda_reg = NULL OR B.vdprdbda_reg = 0) THEN 0 ELSE 1 end AND
     A.vendedor = CASE WHEN (B.vdprdbda_ven = NULL OR B.vdprdbda_ven = '') THEN 0 ELSE 1 end AND
     A.grupo_canal = CASE WHEN (B.vdprdbda_can = NULL OR B.vdprdbda_can = '') THEN 0 ELSE 1 end AND
     A.cond_pagto = CASE WHEN (B.vdprdbda_cpg = NULL OR B.vdprdbda_cpg = 0) THEN 0 ELSE 1 end AND
