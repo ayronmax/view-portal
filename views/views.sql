@@ -815,7 +815,7 @@ SELECT REPEAT('0', 8 - length(Cast(chdepo01. "crchqdep_codcli" AS VARCHAR(8)))) 
        END AS TIPO_REGISTRO,
        chdepo01. "crchqdep_nped" AS NUMERO_PEDIDO,
        chdepo01. "crchqdep_vldoc" AS VALOR
-FROM DBCONTROL2016001.CHDEPO01 WHERE chdepo01. "crchqdep_dtv" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
+FROM  CHDEPO01 WHERE chdepo01. "crchqdep_dtv" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
 AND (chdepo01. "crchqdep_dte" = @DATA_OPERACAO
      OR @DATA_OPERACAO = 0)
 UNION
@@ -832,7 +832,7 @@ SELECT REPEAT('0', 8 - length(Cast(chdev01. "crchqdev_ccli" AS VARCHAR(8)))) || 
        '3' AS TIPO_REGISTRO,
        chdev01. "crchqdev_nped" AS NUMERO_PEDIDO,
        chdev01. "crchqdev_vlori" AS VALOR
-FROM DBCONTROL2016001.CHDEV01
+FROM  CHDEV01
 WHERE chdev01. "crchqdev_dtqui" = 0 AND chdev01. "crchqdev_dtemi" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
   AND (chdev01. "crchqdev_dtqui" = @DATA_OPERACAO
        OR @DATA_OPERACAO = 0) UNION ALL
@@ -845,7 +845,7 @@ WHERE chdev01. "crchqdev_dtqui" = 0 AND chdev01. "crchqdev_dtemi" >= CAST(DATETO
          '2' AS TIPO_REGISTRO,
          cadbai01. "crmovbai_nped" AS NUMERO_PEDIDO,
          cadbai01. "crmovbai_valor" AS VALOR
-  FROM DBCONTROL2016001.CADBAI01 WHERE cadbai01. "crmovbai_dtp" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
+  FROM  CADBAI01 WHERE cadbai01. "crmovbai_dtp" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
   AND (cadbai01. "crmovbai_dtp" = @DATA_OPERACAO
        OR @DATA_OPERACAO = 0)
 UNION ALL
@@ -858,7 +858,7 @@ SELECT REPEAT('0', 8 - length(Cast(cadmov01. "crmovmov_ccli" AS VARCHAR(8)))) ||
        '1' AS TIPO_REGISTRO,
        cadmov01. "crmovmov_nped" AS NUMERO_PEDIDO,
        cadmov01. "crmovmov_valor" AS VALOR
-FROM DBCONTROL2016001.CADMOV01
+FROM  CADMOV01
 WHERE (cadmov01. "crmovmov_dte" = @DATA_OPERACAO
        OR @DATA_OPERACAO = 0)
 ORDER BY 3 ;
@@ -1291,52 +1291,52 @@ SELECT CASE WHEN grptab01. "vdtabgrc_cancsn" = 0 THEN 1 ELSE 0 END AS ATIVO, grp
 CREATE or replace VIEW  VW_RESTRICAO_COMERCIAL_ITEM AS 
 SELECT grptab01. "vdtabgrc_tab01" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab01" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab02" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab02" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab03" AS CODIGO_TABELA_PRECO,
               grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab03" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab04" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab04" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab05" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab05" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab06" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001. GRPTAB01
+FROM   GRPTAB01
 WHERE grptab01. "vdtabgrc_tab06" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab07" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab07" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab08" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab08" <> 0
 UNION
 SELECT grptab01. "vdtabgrc_tab09" AS CODIGO_TABELA_PRECO,
        grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-FROM DBCONTROL2016001.GRPTAB01
+FROM  GRPTAB01
 WHERE grptab01. "vdtabgrc_tab09" <> 0 
 UNION
   SELECT grptab01. "vdtabgrc_tab10" AS CODIGO_TABELA_PRECO,
          grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP
-  FROM DBCONTROL2016001.GRPTAB01 WHERE grptab01. "vdtabgrc_tab10" <> 0 ;
+  FROM  GRPTAB01 WHERE grptab01. "vdtabgrc_tab10" <> 0 ;
 
 declare set varchar(255) @codigo_restricao = '';
 
