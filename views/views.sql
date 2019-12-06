@@ -322,9 +322,17 @@ REPEAT('0', 8 - length(Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)))) || Cast(
 NULL AS CODIGO_MODELO,
 NULL AS CODIGO_OCORRENCIA,
 NULL AS CODIGO_SITUACAO,
-cevped01."vdcevpen_dte" AS DATA_CEV,
+CASE WHEN CRMOVMOV_DTE <> 0 THEN
+       TO_DATE(SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),7,2) || SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),5,2) || SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),1,4), 'DDMMYYYY')
+     ELSE
+       NULL
+END DATA_CEV,
 NULL AS DATA_UTILMA_AUDITORIA,
-cevped01."vdcevpen_dtv" AS DATA_VENCIMENTO,
+CASE WHEN CRMOVMOV_DTE <> 0 THEN
+       TO_DATE(SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),7,2) || SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),5,2) || SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),1,4), 'DDMMYYYY')
+     ELSE
+       NULL
+END DATA_VENCIMENTO,
 NULL AS DESCRICAO_MODELO,
  NULL AS FAZ_INVENTARIO,
  NULL AS NOME_FABRICANTE,
@@ -982,13 +990,12 @@ WHERE
         VDPAROCO_CODEMP = @CODIGO_EMPRESA
         OR @CODIGO_EMPRESA = 0
     );
-
+    
 
 DECLARE SET VARCHAR(255) @CODIGO_PEDIDO = '';
-
-
 CREATE
 or replace VIEW  VW_PEDIDO_PENDENTE_LIBERACAO AS
+
 SELECT
     CASE WHEN pedcp01."vdpedcpe_fl" = 9 THEN 0 ELSE 1 END AS ATIVO,
     pedcp01."vdpedcpe_dtemiped" AS DATA_HORA_EMISSAO_PEDIDO,
@@ -996,7 +1003,7 @@ SELECT
     pedcp01."vdpedcpe_descfi" AS DESCONTO_FINANCEIRO,
     pedcp01."vdpedcpe_nped" AS NUMERO_PEDIDO,
     pedcp01."vdpedcpe_desc" AS PERCENTUAL_DESCONTO,
-    pedcp01."vdpedcpe_fl" AS STATUS_PEDIDO,
+    CASE WHEN pedcp01."vdpedcpe_fl" = 5 THEN 7 ELSE pedcp01."vdpedcpe_fl" END AS STATUS_PEDIDO,
     (
         SELECT
             CASE WHEN tabblq01."vdcadbpd_descr" = NULL THEN 'LIBERADO' ELSE tabblq01."vdcadbpd_descr" END
@@ -1045,9 +1052,6 @@ WHERE
         pedcp01."vdpedcpe_fl" = 5
         OR pedcp01."vdpedcpe_fl" = 7
     );
-
-
-
 
 
 CREATE
