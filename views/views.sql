@@ -318,71 +318,45 @@ DECLARE SET INT @codigo_cev = 0;
 
 CREATE or replace VIEW VW_COMODATO AS
 SELECT
-REPEAT('0', 8 - length(Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)))) || Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)) AS CODIGO_CLIENTE_ERP,
-NULL AS CODIGO_MODELO,
-NULL AS CODIGO_OCORRENCIA,
-NULL AS CODIGO_SITUACAO,
-CASE WHEN CRMOVMOV_DTE <> 0 THEN
-       TO_DATE(SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),7,2) || SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),5,2) || SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),1,4), 'DDMMYYYY')
-     ELSE
-       NULL
-END DATA_CEV,
-NULL AS DATA_UTILMA_AUDITORIA,
-CASE WHEN CRMOVMOV_DTE <> 0 THEN
-       TO_DATE(SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),7,2) || SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),5,2) || SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),1,4), 'DDMMYYYY')
-     ELSE
-       NULL
-END DATA_VENCIMENTO,
-NULL AS DESCRICAO_MODELO,
- NULL AS FAZ_INVENTARIO,
- NULL AS NOME_FABRICANTE,
- NULL AS NUMERO_ATIVO,
- cevped01."vdcevpen_nrccev" AS NUMERO_CEV,
- NULL AS NUMERO_CEV_ITEM,
- NULL AS PATRIMONIO_DOIS,
- (
-  SELECT
-   cadprd01."vdprdprd_codr"
-  FROM
-   CADPRD01
-  WHERE
-   cadprd01."vdprdprd_cfam" = cast(
-    left(
-     concat(
-      repeat(
-       '0',
-       6 - length(cast(cevped01."vdcevpen_prod" as varchar(6)))
-      ),
-      cast(cevped01."vdcevpen_prod" as varchar(6))
-     ),
-     3
-    ) AS SMALLINT
-   )
-   AND cadprd01."vdprdprd_nro" = Cast(
-    right(
-     concat(
-      repeat(
-       '0',
-       6 - length(cast(cevped01."vdcevpen_prod" as varchar(6)))
-      ),
-      cast(cevped01."vdcevpen_prod" as varchar(6))
-     ),
-     3
-    ) AS SMALLINT
-   )
- ) AS CODIGO_PRODUTO_ERP,
- cevped01."vdcevpen_qtdprd" AS QUANTIDADE,
- NULL AS TABELA_PRECO_REC_ID,
- NULL AS TECNOLOGIA_UTILIZADA,
- NULL AS TIPO_STATUS,
- NULL AS VALOR_ITEM
+  REPEAT('0', 8 - length(Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)))) || Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)) CODIGO_CLIENTE_ERP,
+  NULL CODIGO_MODELO,
+  NULL CODIGO_OCORRENCIA,
+  NULL CODIGO_SITUACAO,
+  CASE WHEN VDCEVPEN_DTE <> 0 THEN
+         TO_DATE(SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),7,2) || SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),5,2) || SUBSTRING(cast(VDCEVPEN_DTE as varchar(8)),1,4), 'DDMMYYYY')
+       ELSE
+         NULL
+  END DATA_CEV,
+  NULL DATA_UTILMA_AUDITORIA,
+  CASE WHEN VDCEVPEN_DTV <> 0 THEN
+         TO_DATE(SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),7,2) || SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),5,2) || SUBSTRING(cast(VDCEVPEN_DTV as varchar(8)),1,4), 'DDMMYYYY')
+       ELSE
+         NULL
+  END DATA_VENCIMENTO,
+  NULL DESCRICAO_MODELO,
+  NULL FAZ_INVENTARIO,
+  NULL NOME_FABRICANTE,
+  NULL NUMERO_ATIVO,
+  vdcevpen_nrccev NUMERO_CEV,
+  NULL NUMERO_CEV_ITEM,
+  NULL PATRIMONIO_DOIS,
+  (SELECT
+     vdprdprd_codr
+   FROM
+     CADPRD01
+   WHERE
+     vdprdprd_cfam = cast(left(concat(repeat('0',6-length(cast(vdcevpen_prod AS varchar(6)))),cast(vdcevpen_prod as varchar(6))),3) AS SMALLINT) AND
+     vdprdprd_nro = Cast(right(concat(repeat('0',6-length(cast(vdcevpen_prod as varchar(6)))),cast(vdcevpen_prod as varchar(6))),3) AS SMALLINT)
+  ) CODIGO_PRODUTO_ERP,
+  vdcevpen_qtdprd QUANTIDADE,
+  NULL TABELA_PRECO_REC_ID,
+  NULL TECNOLOGIA_UTILIZADA,
+  NULL TIPO_STATUS,
+  NULL VALOR_ITEM
 FROM
- CEVPED01
+  CEVPED01
 WHERE
- (
-  cevped01."vdcevpen_nrccev" = @codigo_cev
-  OR @codigo_cev = 0
- );
+ (vdcevpen_nrccev = @codigo_cev OR @codigo_cev = 0);
 
 DECLARE SET INT @CODIGO_CONDICAO_PAGAMENTO = 0;
 CREATE
