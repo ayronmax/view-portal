@@ -991,68 +991,31 @@ WHERE
         OR @CODIGO_EMPRESA = 0
     );
     
+DECLARE SET VARCHAR(12) @CODIGO_PEDIDO = '';
 
-DECLARE SET VARCHAR(255) @CODIGO_PEDIDO = '';
-CREATE
-or replace VIEW  VW_PEDIDO_PENDENTE_LIBERACAO AS
-
+CREATE OR REPLACE VIEW VW_PEDIDO_PENDENTE_LIBERACAO AS
 SELECT
-    CASE WHEN pedcp01."vdpedcpe_fl" = 9 THEN 0 ELSE 1 END AS ATIVO,
-    pedcp01."vdpedcpe_dtemiped" AS DATA_HORA_EMISSAO_PEDIDO,
-    pedcp01."vdpedcpe_dt1vc" AS DATA_VENCIMENTO,
-    pedcp01."vdpedcpe_descfi" AS DESCONTO_FINANCEIRO,
-    pedcp01."vdpedcpe_nped" AS NUMERO_PEDIDO,
-    pedcp01."vdpedcpe_desc" AS PERCENTUAL_DESCONTO,
-    CASE WHEN pedcp01."vdpedcpe_fl" = 5 THEN 7 ELSE pedcp01."vdpedcpe_fl" END AS STATUS_PEDIDO,
-    (
-        SELECT
-            CASE WHEN tabblq01."vdcadbpd_descr" = NULL THEN 'LIBERADO' ELSE tabblq01."vdcadbpd_descr" END
-        FROM
-             TABBLQ01
-        WHERE
-            tabblq01."vdcadbpd_cod" = pedcp01."vdpedcpe_fl"
-    ) AS DESCRICAO_BLOQUEIO,
-    pedcp01."vdpedcpe_txfin" AS TAXA_FINANCEIRO,
-    pedcp01."vdpedcpe_vlr_fcem_r" + pedcp01."vdpedcpe_vlr_fsem_r" + pedcp01."vdpedcpe_vlr_fctr_r" + pedcp01."vdpedcpe_vlr_fstr_r" AS VALOR_DEVOLUCAO,
-    pedcp01."vdpedcpe_vlr_fcem" + pedcp01."vdpedcpe_vlr_fsem" + pedcp01."vdpedcpe_vlr_fctr" + pedcp01."vdpedcpe_vlr_fstr" AS VALOR_PEDIDO,
-    CASE WHEN Length(Cast(pedcp01."vdpedcpe_codcli" AS CHAR(8))) = 5 THEN Concat(
-        '000',
-        Cast(pedcp01."vdpedcpe_codcli" AS VARCHAR(8))
-    ) WHEN Length(Cast(pedcp01."vdpedcpe_codcli" AS CHAR(8))) = 6 THEN Concat(
-        '00',
-        Cast(pedcp01."vdpedcpe_codcli" AS VARCHAR(8))
-    ) WHEN Length(Cast(pedcp01."vdpedcpe_codcli" AS CHAR(8))) = 7 THEN Concat(
-        '0',
-        Cast(pedcp01."vdpedcpe_codcli" AS VARCHAR(4))
-    ) WHEN Length(Cast(pedcp01."vdpedcpe_codcli" AS CHAR(8))) = 8 THEN Cast(pedcp01."vdpedcpe_codcli" AS VARCHAR(8)) END AS CODIGO_CLIENTE_REC_ID,
-    pedcp01."vdpedcpe_cpg" AS CODIGO_CONDICAO_PAGAMENTO_REC_ID,
-    pedcp01."vdpedcpe_tpcobr" AS CODIGO_TIPO_COBRANCA_REC_ID,
-    (
-        SELECT
-            cadven01."vdvenven_sigla"
-        FROM
-             CADVEN01
-        WHERE
-            cadven01."vdvenven_sigla" = pedcp01."vdpedcpe_ven"
-    ) AS CODIGO_VENDEDOR,
-    (
-        SELECT
-            cadven01."vdvenven_nome"
-        FROM
-             CADVEN01
-        WHERE
-            cadven01."vdvenven_sigla" = pedcp01."vdpedcpe_ven"
-    ) AS NOME_VENDEDOR
+  CASE WHEN VDPEDCPE_FL = 9 THEN 0 ELSE 1 END ATIVO,
+  TO_DATE(SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),1,4), 'DDMMYYYY') DATA_HORA_EMISSAO_PEDIDO,
+  TO_DATE(SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),1,4), 'DDMMYYYY') DATA_VENCIMENTO,
+  vdpedcpe_descfi DESCONTO_FINANCEIRO,
+  vdpedcpe_nped NUMERO_PEDIDO,
+  vdpedcpe_desc PERCENTUAL_DESCONTO,
+  CASE WHEN vdpedcpe_fl in (5,4,3,2,1) THEN 7 ELSE vdpedcpe_fl END STATUS_PEDIDO,
+  (SELECT CASE WHEN vdcadbpd_descr = NULL THEN 'LIBERADO' ELSE vdcadbpd_descr END FROM TABBLQ01 WHERE vdcadbpd_cod = vdpedcpe_fl) DESCRICAO_BLOQUEIO,
+  vdpedcpe_txfin TAXA_FINANCEIRO,
+  vdpedcpe_vlr_fcem_r + vdpedcpe_vlr_fsem_r + vdpedcpe_vlr_fctr_r + vdpedcpe_vlr_fstr_r VALOR_DEVOLUCAO,
+  vdpedcpe_vlr_fcem + vdpedcpe_vlr_fsem + vdpedcpe_vlr_fctr + vdpedcpe_vlr_fstr VALOR_PEDIDO,
+  repeat('0',8-length(cast(vdpedcpe_codcli as varchar(8)))) || cast(vdpedcpe_codcli as varchar(8)) CODIGO_CLIENTE_REC_ID,
+  vdpedcpe_cpg CODIGO_CONDICAO_PAGAMENTO_REC_ID,
+  vdpedcpe_tpcobr CODIGO_TIPO_COBRANCA_REC_ID,
+  (SELECT vdvenven_sigla FROM CADVEN01 WHERE vdvenven_sigla = vdpedcpe_ven) AS CODIGO_VENDEDOR,
+  (SELECT vdvenven_nome FROM CADVEN01 WHERE vdvenven_sigla = vdpedcpe_ven) AS NOME_VENDEDOR
 FROM
-     PEDCP01
+  PEDCP01
 WHERE
-    Cast(pedcp01."vdpedcpe_nped" AS VARCHAR(12)) = @CODIGO_PEDIDO
-    OR @CODIGO_PEDIDO = ''
-    AND (
-        pedcp01."vdpedcpe_fl" = 5
-        OR pedcp01."vdpedcpe_fl" = 7
-    );
-
+  (Cast(vdpedcpe_nped AS VARCHAR(12)) = @CODIGO_PEDIDO OR @CODIGO_PEDIDO = '') AND 
+  (vdpedcpe_fl IN (7,5,4,3,2,1));
 
 CREATE
 or replace VIEW  VW_PEDIDO_SUGESTAO AS
