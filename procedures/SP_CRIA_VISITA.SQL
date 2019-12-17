@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE SP_CRIA_VISITA(IN QTD_DIAS SMALLINT, IN USUARIO VARCHAR(20))
+CREATE OR REPLACE PROCEDURE SP_CRIA_VISITA(IN QTD_DIAS SMALLINT)
 
 LANGUAGE SQL
 
@@ -26,11 +26,7 @@ BEGIN
   SET intCountDays = 1;  
   SET strCondicao1 = '*';
   
-  IF USUARIO = '' THEN
-     SET strUser = SELECT TRIM(CURRENT_USER);
-  ELSE
-     SET strUser = USUARIO; 
-  END IF;
+  SET strUser = SELECT TRIM(CURRENT_USER);
   
   SET strSql = 'SELECT table_name FROM systable WHERE table_type = ''TABLE'' AND table_owner = ''';
   SET strSql = strSql || strUser;
