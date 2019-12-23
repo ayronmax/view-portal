@@ -779,71 +779,88 @@ WHERE
 
 DECLARE SET INT @DATA_OPERACAO = 0;
 
-CREATE
-or replace VIEW VW_MOVIMENTO_FINANCEIRO AS
-SELECT REPEAT('0', 8 - length(Cast(chdepo01. "crchqdep_codcli" AS VARCHAR(8)))) || Cast(chdepo01. "crchqdep_codcli" AS VARCHAR(8)) AS CODIGO_CLIENTE_ERP,
-       NULL AS CODIGO_PRODUTO_ERP,
-       CASE
-           WHEN chdepo01. "crchqdep_dtv" >=CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT) THEN chdepo01. "crchqdep_dte"
-           ELSE chdepo01. "crchqdep_dtv"
-       END AS DATA_OPERACAO,
-       chdepo01. "crchqdep_dtv" AS DATA_VENCIMENTO,
-       CASE WHEN chdepo01. "crchqdep_dte" = chdepo01. "crchqdep_dtv" THEN 1
-           ELSE 2
-       END AS MOD,
-       Cast(chdepo01. "crchqdep_ndoc" AS VARCHAR(255)) AS NUMERO_DOCUMENTO,
-       CASE WHEN chdepo01. "crchqdep_dtv" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT) THEN '1'
-           ELSE '2'
-       END AS TIPO_REGISTRO,
-       chdepo01. "crchqdep_nped" AS NUMERO_PEDIDO,
-       chdepo01. "crchqdep_vldoc" AS VALOR
-FROM  CHDEPO01 WHERE chdepo01. "crchqdep_dtv" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
-AND (chdepo01. "crchqdep_dte" = @DATA_OPERACAO
-     OR @DATA_OPERACAO = 0)
-UNION
- ALL
-SELECT REPEAT('0', 8 - length(Cast(chdev01. "crchqdev_ccli" AS VARCHAR(8)))) || Cast(chdev01. "crchqdev_ccli" AS VARCHAR(8)) AS CODIGO_CLIENTE_ERP,
-       NULL AS CODIGO_PRODUTO,
-       CASE
-           WHEN chdev01. "crchqdev_dtqui" > 0 THEN chdev01. "crchqdev_dtqui"
-           ELSE 0
-       END AS DATA_OPERACAO,
-       chdev01. "crchqdev_dtvto" AS DATA_VENCIMENTO,
-       0 AS MOD,
-       chdev01. "crchqdev_nchq" AS NUMERO_DOCUMENTO,
-       '3' AS TIPO_REGISTRO,
-       chdev01. "crchqdev_nped" AS NUMERO_PEDIDO,
-       chdev01. "crchqdev_vlori" AS VALOR
-FROM  CHDEV01
-WHERE chdev01. "crchqdev_dtqui" = 0 AND chdev01. "crchqdev_dtemi" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
-  AND (chdev01. "crchqdev_dtqui" = @DATA_OPERACAO
-       OR @DATA_OPERACAO = 0) UNION ALL
-  SELECT REPEAT('0', 8 - length(Cast(cadbai01. "crmovbai_ccli" AS VARCHAR (8)))) || Cast(cadbai01. "crmovbai_ccli" AS VARCHAR(8)) AS CODIGO_CLIENTE_ERP,
-         NULL AS CODIGO_PRODUTO,
-         cadbai01. "crmovbai_dtp" AS DATA_OPERACAO,
-         cadbai01. "crmovbai_dtv" AS DATA_VENCIMENTO,
-         cadbai01. "crmovbai_mod" AS MOD,
-         cadbai01. "crmovbai_ndupl" AS NUMERO_DOCUMENTO,
-         '2' AS TIPO_REGISTRO,
-         cadbai01. "crmovbai_nped" AS NUMERO_PEDIDO,
-         cadbai01. "crmovbai_valor" AS VALOR
-  FROM  CADBAI01 WHERE cadbai01. "crmovbai_dtp" >= CAST(DATETOSTR(Curdate()-45, 'yyyymmdd') AS INT)
-  AND (cadbai01. "crmovbai_dtp" = @DATA_OPERACAO
-       OR @DATA_OPERACAO = 0)
+CREATE or replace VIEW VW_MOVIMENTO_FINANCEIRO AS
+SELECT 
+  REPEAT('0',8-length(Cast(crchqdep_codcli AS VARCHAR(8)))) || Cast(crchqdep_codcli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
+  NULL CODIGO_PRODUTO_ERP,
+  CASE WHEN crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) THEN 
+         crchqdep_dte
+       ELSE 
+         crchqdep_dtv
+  END DATA_OPERACAO,
+  crchqdep_dtv DATA_VENCIMENTO,
+  CASE WHEN crchqdep_dte = crchqdep_dtv THEN
+         1
+       ELSE 
+         2
+  END MOD,
+  Cast(crchqdep_ndoc AS VARCHAR(255)) NUMERO_DOCUMENTO,
+  CASE WHEN crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) THEN
+        '1'
+       ELSE
+        '2'
+  END TIPO_REGISTRO,
+  crchqdep_nped NUMERO_PEDIDO,
+  crchqdep_vldoc VALOR
+FROM  
+  CHDEPO01 
+WHERE 
+  crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
+  (crchqdep_dte = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
 UNION ALL
-SELECT REPEAT('0', 8 - length(Cast(cadmov01. "crmovmov_ccli" AS VARCHAR(8)))) || Cast(cadmov01. "crmovmov_ccli" AS VARCHAR(8)) AS CODIGO_CLIENTE_ERP,
-       NULL AS CODIGO_PRODUTO,
-       cadmov01. "crmovmov_dte" AS DATA_OPERACAO,
-       cadmov01. "crmovmov_dtv" AS DATA_VENCIMENTO,
-       cadmov01. "crmovmov_mod" AS MOD,
-       cadmov01. "crmovmov_ndupl" AS NUMERO_DOCUMENTO,
-       '1' AS TIPO_REGISTRO,
-       cadmov01. "crmovmov_nped" AS NUMERO_PEDIDO,
-       cadmov01. "crmovmov_valor" AS VALOR
-FROM  CADMOV01
-WHERE (cadmov01. "crmovmov_dte" = @DATA_OPERACAO
-       OR @DATA_OPERACAO = 0)
-ORDER BY 3 ;
+SELECT 
+  REPEAT('0',8-length(Cast(crchqdvv_ccli AS VARCHAR(8)))) || Cast(crchqdvv_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
+  NULL CODIGO_PRODUTO,
+  CASE WHEN crchqdvv_dtqui > 0 THEN 
+         crchqdvv_dtqui
+       ELSE
+         0
+  END DATA_OPERACAO,
+  crchqdvv_dtvto DATA_VENCIMENTO,
+  0 MOD,
+  CAST(crchqdvv_nchq AS VARCHAR(255)) NUMERO_DOCUMENTO,
+  '3' TIPO_REGISTRO,
+  crchqdvv_nped NUMERO_PEDIDO,
+  crchqdvv_vlori VALOR
+FROM  
+  CHDVV01
+WHERE 
+  crchqdvv_dtqui = 0 AND
+  crchqdvv_dtemi >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
+  (crchqdvv_dtqui = @DATA_OPERACAO OR @DATA_OPERACAO = 0) 
+UNION ALL
+SELECT 
+  REPEAT('0',8-length(Cast(crmovbai_ccli AS VARCHAR (8)))) || Cast(crmovbai_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
+  NULL CODIGO_PRODUTO,
+  crmovbai_dtp DATA_OPERACAO,
+  crmovbai_dtv DATA_VENCIMENTO,
+  crmovbai_mod MOD,
+  crmovbai_ndupl NUMERO_DOCUMENTO,
+  '2' TIPO_REGISTRO,
+  crmovbai_nped NUMERO_PEDIDO,
+  crmovbai_valor VALOR
+FROM
+  CADBAI01 
+WHERE 
+  crmovbai_dtp >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
+  (crmovbai_dtp = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
+UNION ALL
+SELECT 
+  REPEAT('0',8-length(Cast(crmovmov_ccli AS VARCHAR(8)))) || Cast(crmovmov_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
+  NULL CODIGO_PRODUTO,
+  crmovmov_dte DATA_OPERACAO,
+  crmovmov_dtv DATA_VENCIMENTO,
+  crmovmov_mod MOD,
+  crmovmov_ndupl NUMERO_DOCUMENTO,
+  '1' TIPO_REGISTRO,
+  crmovmov_nped NUMERO_PEDIDO,
+  crmovmov_valor VALOR
+FROM  
+  CADMOV01
+WHERE 
+  (crmovmov_dte = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
+ORDER BY 
+  3;
 
 DECLARE SET VARCHAR(255) @CODIGO_OCORRENCIA ='';
 
