@@ -1005,8 +1005,8 @@ SELECT
 FROM
   PEDCP01
 WHERE
-  (Cast(vdpedcpe_nped AS VARCHAR(12)) = @CODIGO_PEDIDO OR @CODIGO_PEDIDO = '') AND 
-  (vdpedcpe_fl IN (7,5,4,3,2,1));
+  (Cast(vdpedcpe_nped AS VARCHAR(12)) = @CODIGO_PEDIDO OR @CODIGO_PEDIDO = '') AND
+  ((vdpedcpe_fl IN (7,5,4,3,2,1) AND @CODIGO_PEDIDO = '') OR (vdpedcpe_fl IN (7,5,4,3,2,1,0) AND @CODIGO_PEDIDO <> ''));
 
 CREATE
 or replace VIEW  VW_PEDIDO_SUGESTAO AS
