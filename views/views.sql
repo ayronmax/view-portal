@@ -1,5 +1,25 @@
 create function datetostr.DATETOSTR(DATE, varchar(20)) RETURNS varchar(20);
 
+CREATE OR REPLACE VIEW VW_DADOS_CLIENTE AS 
+SELECT 
+  VDCLICLI_REGI REGIAO_CLIENTE,
+  VDCLICLI_NUM NUMERO_CLIENTE,  
+  cast(concat(concat(repeat('0',4-length(cast(vdclicli_regi as varchar(4)))),cast(vdclicli_regi as varchar(4))),concat(repeat('0',4-length(cast(vdclicli_num as varchar(4)))),cast(vdclicli_num as varchar(4)))) as VARCHAR(8)) CODIGO_CLIENTE,
+  VDCLICLI_CGC as CNPJ_CPF,
+  VDCLICLI_RAZAO50 AS RAZAO_CLIENTE,
+  VDCLICLI_VEN CODIGO_VENDEDOR,
+  VDCLICLI_CODPASTA1 NUMERO_PASTA,
+  VDCLICLI_VEN2 CODIGO_VENDEDOR2,
+  VDCLICLI_CODPASTA2 NUMERO_PASTA2,
+  VDCLICLI_VEN3 CODIGO_VENDEDOR3,
+  VDCLICLI_CODPASTA2 NUMERO_PASTA3,
+  VDCLICLI_VEN2 CODIGO_VENDEDOR4,
+  VDCLICLI_CODPASTA2 NUMERO_PASTA4,
+  VDCLICLI_VEN2 CODIGO_VENDEDOR5,
+  VDCLICLI_CODPASTA5 NUMERO_PASTA5
+FROM 
+  CADCLI01;
+
 DECLARE SET INT @CODIGOPEDIDO = 0;
 
 CREATE OR REPLACE view  vw_acompanhamento_pedido 
@@ -1976,291 +1996,66 @@ WHERE
 DECLARE SET VARCHAR(255) @CODIGO_VENDEDOR = '';
 
 CREATE or replace VIEW  VW_VENDEDOR AS SELECT 1 AS ATIVO, cadven01. "vdvenven_sigla" AS CODIGO_VENDEDOR_ERP, cadven01. "vdvenven_nome" AS NOME, cadven01. "vdvenven_ddd" AS TELEFONE_DD, cadven01. "vdvenven_tel" AS TELEFONE_TRONCO, cast(cadven01. "vdvenven_nivel" as varchar(1)) AS TIPO, cadven01. "vdvenven_tpven" AS TIPO_VENDA FROM  CADVEN01 WHERE ( cadven01. "vdvenven_sigla" = @CODIGO_VENDEDOR OR @CODIGO_VENDEDOR = '' );
-    
+
 
 declare set varchar(255) @CODIGO_CLIENTE = '';
 
-CREATE
-or replace VIEW  VW_VENDEDOR_CLIENTE AS
+CREATE or replace VIEW VW_VENDEDOR_CLIENTE AS
 SELECT
-    1 AS ATIVO,
-    Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-    ) AS CODIGO_CLIENTE_ERP,
-	1 as VENDEDOR,
-    cadcli01."vdclicli_ven" AS CODIGO_VENDEDOR_ERP,
-    VDCLICLI_CODPASTA1 PASTA_VISITA
+  1 ATIVO,
+  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
+  1 VENDEDOR,
+  CODIGO_VENDEDOR CODIGO_VENDEDOR_ERP,
+  NUMERO_PASTA PASTA_VISITA
 FROM
-     CADCLI01
+  VW_DADOS_CLIENTE
 WHERE
-    (
-        Concat(
-            CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-            CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-        ) = @CODIGO_CLIENTE
-        OR @CODIGO_CLIENTE = ''
-    )
+  CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = ''
 UNION 
 SELECT
-    1 AS ATIVO,
-    Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-    ) AS CODIGO_CLIENTE_ERP,
-	2 as VENDEDOR,
-    cadcli01."vdclicli_ven2" AS CODIGO_VENDEDOR_ERP,
-    VDCLICLI_CODPASTA2 PASTA_VISITA
+  1 ATIVO,
+  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
+  2 VENDEDOR,
+  CODIGO_VENDEDOR2 CODIGO_VENDEDOR_ERP,
+  NUMERO_PASTA2 PASTA_VISITA
 FROM
-     CADCLI01
+  VW_DADOS_CLIENTE
 WHERE
-    (
-        Concat(
-            CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-            CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-        ) = @CODIGO_CLIENTE
-        OR @CODIGO_CLIENTE = ''
-    ) AND VDCLICLI_VEN2 <> ''    
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR2 <> ''    
 UNION
 SELECT
-    1 AS ATIVO,
-    Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-    ) AS CODIGO_CLIENTE_ERP,
-	3 as VENDEDOR,
-    cadcli01."vdclicli_ven3" AS CODIGO_VENDEDOR_ERP,
-    VDCLICLI_CODPASTA3 PASTA_VISITA
+  1 ATIVO,
+  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
+  3 VENDEDOR,
+  CODIGO_VENDEDOR3 CODIGO_VENDEDOR_ERP,
+  NUMERO_PASTA3 PASTA_VISITA
 FROM
-     CADCLI01
+  VW_DADOS_CLIENTE
 WHERE
-    (
-        Concat(
-            CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-            CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-        ) = @CODIGO_CLIENTE
-        OR @CODIGO_CLIENTE = ''
-    ) AND VDCLICLI_VEN3 <> ''    
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR3 <> ''    
 UNION
 SELECT
-    1 AS ATIVO,
-    Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-    ) AS CODIGO_CLIENTE_ERP,
-	4 as VENDEDOR,
-    cadcli01."vdclicli_ven4" AS CODIGO_VENDEDOR_ERP,
-    VDCLICLI_CODPASTA4 PASTA_VISITA
+  1 ATIVO,
+  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
+  4 VENDEDOR,
+  CODIGO_VENDEDOR4 CODIGO_VENDEDOR_ERP,
+  NUMERO_PASTA4 PASTA_VISITA
 FROM
-     CADCLI01
+  VW_DADOS_CLIENTE
 WHERE
-    (
-        Concat(
-            CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-            CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-        ) = @CODIGO_CLIENTE
-        OR @CODIGO_CLIENTE = ''
-    ) AND VDCLICLI_VEN4 <> ''
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR4 <> ''
 UNION    
 SELECT
-    1 AS ATIVO,
-    Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-            '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-            '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-            '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-    ) AS CODIGO_CLIENTE_ERP,
-	5 as VENDEDOR,
-    cadcli01."vdclicli_ven5" AS CODIGO_VENDEDOR_ERP,
-    VDCLICLI_CODPASTA5 PASTA_VISITA
+  1 ATIVO,
+  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
+  5 VENDEDOR,
+  CODIGO_VENDEDOR5 CODIGO_VENDEDOR_ERP,
+  NUMERO_PASTA5 PASTA_VISITA
 FROM
-     CADCLI01
+  VW_DADOS_CLIENTE
 WHERE
-    (
-        Concat(
-            CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-            CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
-                '000',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
-                '00',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
-                '0',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
-        ) = @CODIGO_CLIENTE
-        OR @CODIGO_CLIENTE = ''
-    ) AND VDCLICLI_VEN5 <> '';    
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR5 <> '';    
+
 
 declare set int @pasta = 0;
 CREATE
@@ -3323,16 +3118,6 @@ FROM
   VDPEDFLC 
 WHERE 
   VDPEDFLC_NPED >= cast(trim(DATETOSTR(Curdate()-45,'yyyymmdd')) || '0000' as bigint);
-
-CREATE OR REPLACE VIEW VW_DADOS_CLIENTE AS 
-SELECT 
-  VDCLICLI_REGI REGIAO_CLIENTE,
-  VDCLICLI_NUM NUMERO_CLIENTE,  
-  cast(concat(concat(repeat('0',4-length(cast(vdclicli_regi as varchar(4)))),cast(vdclicli_regi as varchar(4))),concat(repeat('0',4-length(cast(vdclicli_num as varchar(4)))),cast(vdclicli_num as varchar(4)))) as VARCHAR(8)) CODIGO_CLIENTE,
-  VDCLICLI_CGC as CNPJ_CPF,
-  VDCLICLI_RAZAO50 AS RAZAO_CLIENTE
-FROM 
-  CADCLI01;
 
 CREATE OR REPLACE VIEW VW_DADOS_OCORRENCIA AS 
 SELECT 
