@@ -800,18 +800,18 @@ WHERE
 DECLARE SET INT @DATA_OPERACAO = 0;
 
 CREATE or replace VIEW VW_MOVIMENTO_FINANCEIRO AS
-SELECT 
+SELECT
   REPEAT('0',8-length(Cast(crchqdep_codcli AS VARCHAR(8)))) || Cast(crchqdep_codcli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO_ERP,
-  CASE WHEN crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) THEN 
+  CASE WHEN crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) THEN
          crchqdep_dte
-       ELSE 
+       ELSE
          crchqdep_dtv
   END DATA_OPERACAO,
   crchqdep_dtv DATA_VENCIMENTO,
   CASE WHEN crchqdep_dte = crchqdep_dtv THEN
          1
-       ELSE 
+       ELSE
          2
   END MOD,
   Cast(crchqdep_ndoc AS VARCHAR(255)) NUMERO_DOCUMENTO,
@@ -822,16 +822,16 @@ SELECT
   END TIPO_REGISTRO,
   crchqdep_nped NUMERO_PEDIDO,
   crchqdep_vldoc VALOR
-FROM  
-  CHDEPO01 
-WHERE 
+FROM
+  CHDEPO01
+WHERE
   crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
   (crchqdep_dte = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
 UNION ALL
-SELECT 
+SELECT
   REPEAT('0',8-length(Cast(crchqdvv_ccli AS VARCHAR(8)))) || Cast(crchqdvv_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO,
-  CASE WHEN crchqdvv_dtqui > 0 THEN 
+  CASE WHEN crchqdvv_dtqui > 0 THEN
          crchqdvv_dtqui
        ELSE
          0
@@ -842,14 +842,13 @@ SELECT
   '3' TIPO_REGISTRO,
   crchqdvv_nped NUMERO_PEDIDO,
   crchqdvv_vlori VALOR
-FROM  
+FROM
   CHDVV01
-WHERE 
+WHERE
   crchqdvv_dtqui = 0 AND
-  crchqdvv_dtemi >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
-  (crchqdvv_dtqui = @DATA_OPERACAO OR @DATA_OPERACAO = 0) 
+  (crchqdvv_dtqui = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
 UNION ALL
-SELECT 
+SELECT
   REPEAT('0',8-length(Cast(crmovbai_ccli AS VARCHAR (8)))) || Cast(crmovbai_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO,
   crmovbai_dtp DATA_OPERACAO,
@@ -860,12 +859,12 @@ SELECT
   crmovbai_nped NUMERO_PEDIDO,
   crmovbai_valor VALOR
 FROM
-  CADBAI01 
-WHERE 
+  CADBAI01
+WHERE
   crmovbai_dtp >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
   (crmovbai_dtp = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
 UNION ALL
-SELECT 
+SELECT
   REPEAT('0',8-length(Cast(crmovmov_ccli AS VARCHAR(8)))) || Cast(crmovmov_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO,
   crmovmov_dte DATA_OPERACAO,
@@ -875,12 +874,12 @@ SELECT
   '1' TIPO_REGISTRO,
   crmovmov_nped NUMERO_PEDIDO,
   crmovmov_valor VALOR
-FROM  
+FROM
   CADMOV01
-WHERE 
+WHERE
   (crmovmov_dte = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
-ORDER BY 
-  3;
+ORDER BY
+  3; 
 
 DECLARE SET VARCHAR(255) @CODIGO_OCORRENCIA ='';
 
@@ -3110,13 +3109,15 @@ SELECT DISTINCT
     B.vdprdbda_cancsn = 0 AND
     (B.vdprdbda_id = @codigo_banda OR @codigo_banda = 0); 						
 
+// Necessario informar o número da empresa (VDPEDFLC_NREMP = x)
 CREATE OR REPLACE VIEW VW_DADOS_VDPEDFLC AS
 SELECT 
   VDPEDFLC_NPED NUMERO_PEDIDO_VDPEDFLC,
   VDPEDFLC_NPED_REPROGRA numero_pedido_erp_reprogramado
 FROM 
   VDPEDFLC 
-WHERE 
+WHERE
+  VDPEDFLC_NREMP = 1 AND 
   VDPEDFLC_NPED >= cast(trim(DATETOSTR(Curdate()-45,'yyyymmdd')) || '0000' as bigint);
 
 CREATE OR REPLACE VIEW VW_DADOS_OCORRENCIA AS 
@@ -3188,7 +3189,7 @@ SELECT
 FROM
   VW_DADOS_HISTORICO_PEDIDO_CAPA
 INNER JOIN
-  VW_DADOS_CLIENTE ON REGIAO_CLIENTE = REG_CLI_PED AND NUMERO_CLIENTE = NUM_CLI_PED
+  VW_DADOS_CLIENTE ON REGIAO_CLIENTE = REG_CLI_PED AND NUMERO_CLIENTE = NUM_CLI_PED;
 WHERE
     (NUMERO_PEDIDO = @numero_pedido OR @numero_pedido = 0);
 
