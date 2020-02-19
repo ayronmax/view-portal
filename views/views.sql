@@ -2,41 +2,37 @@ create function datetostr.DATETOSTR(DATE, varchar(20)) RETURNS varchar(20);
 
 CREATE OR REPLACE VIEW VW_DADOS_CLIENTE AS 
 SELECT 
-  VDCLICLI_REGI REGIAO_CLIENTE,
-  VDCLICLI_NUM NUMERO_CLIENTE,  
-  cast(concat(concat(repeat('0',4-length(cast(vdclicli_regi as varchar(4)))),cast(vdclicli_regi as varchar(4))),concat(repeat('0',4-length(cast(vdclicli_num as varchar(4)))),cast(vdclicli_num as varchar(4)))) as VARCHAR(8)) CODIGO_CLIENTE,
-  VDCLICLI_CGC as CNPJ_CPF,
-  VDCLICLI_RAZAO50 AS RAZAO_CLIENTE,
-  VDCLICLI_VEN CODIGO_VENDEDOR,
-  VDCLICLI_CODPASTA1 NUMERO_PASTA,
-  VDCLICLI_VEN2 CODIGO_VENDEDOR2,
-  VDCLICLI_CODPASTA2 NUMERO_PASTA2,
-  VDCLICLI_VEN3 CODIGO_VENDEDOR3,
-  VDCLICLI_CODPASTA2 NUMERO_PASTA3,
-  VDCLICLI_VEN2 CODIGO_VENDEDOR4,
-  VDCLICLI_CODPASTA2 NUMERO_PASTA4,
-  VDCLICLI_VEN2 CODIGO_VENDEDOR5,
-  VDCLICLI_CODPASTA5 NUMERO_PASTA5
+  *, 
+  cast(concat(concat(repeat('0',4-length(cast(vdclicli_regi as varchar(4)))),cast(vdclicli_regi as varchar(4))),concat(repeat('0',4-length(cast(vdclicli_num as varchar(4)))),cast(vdclicli_num as varchar(4)))) as VARCHAR(8)) CODIGO_CLIENTE
 FROM 
-  CADCLI01;
+  CADCLI01
+INNER JOIN 
+  (SELECT DISTINCT 
+     VDCLIREG_COD, 
+     VDCLIREG_NUMSUBEMPRESA_BW 
+   FROM CADREG01) CADREG01 
+   ON VDCLIREG_COD = VDCLICLI_REGI AND 
+      VDCLIREG_NUMSUBEMPRESA_BW 
+   BETWEEN 0000 AND 9999;
 
 DECLARE SET INT @CODIGOPEDIDO = 0;
 
 CREATE OR REPLACE view  vw_acompanhamento_pedido 
 AS 
-  SELECT "vdpedflc_nped"         AS NUMERO_PEDIDO_GESTAO, 
-         "vdpedflc_sit_nped"     AS SITUACAO_PEDIDO_GESTAO, 
-         "vdpedflc_pnped"        AS NUMERO_PRE_PEDIDO_GESTAO, 
-         "vdpedflc_croma"        AS NUMERO_ROMANEIO, 
-         "vdpedflc_sit_crom"     AS SITUACAO_ROMANEIO, 
-         "vdpedflc_serie"        AS SERIE_NFISCAL, 
-         "vdpedflc_nf"           AS NUMERO_NFISCAL, 
-         "vdpedflc_cod_bloq_ped" AS CODIGO_BLOQ_PEDIDO,
-		 "VDPEDFLC_NPED_REPROGRA" AS numero_pedido_erp_reprogramado 
-  FROM    vdpedflc 
-  WHERE  ( "vdpedflc_nped" = @codigopedido 
-            OR @codigopedido = 0 ) ;
-
+SELECT 
+  vdpedflc_nped NUMERO_PEDIDO_GESTAO, 
+  vdpedflc_sit_nped SITUACAO_PEDIDO_GESTAO, 
+  vdpedflc_pnped NUMERO_PRE_PEDIDO_GESTAO, 
+  vdpedflc_croma NUMERO_ROMANEIO, 
+  vdpedflc_sit_crom SITUACAO_ROMANEIO, 
+  vdpedflc_serie SERIE_NFISCAL, 
+  vdpedflc_nf NUMERO_NFISCAL, 
+  vdpedflc_cod_bloq_ped CODIGO_BLOQ_PEDIDO,
+  VDPEDFLC_NPED_REPROGRA numero_pedido_erp_reprogramado 
+FROM
+  vdpedflc 
+WHERE
+  VDPEDFLC_NREMP = 1 AND (vdpedflc_nped = @codigopedido OR @codigopedido = 0);
 
 DECLARE SET INTEGER @CODIGO_BANDA = 0;
 
@@ -258,13 +254,13 @@ AS
 DECLARE SET INT @CODIGO_CLIENTE = 0;
 CREATE OR replace VIEW  vw_cliente AS SELECT 0 AS abate_icms,
        CASE 
-              WHEN cadcli01. "vdclicli_classe" = 20 THEN 0 
+              WHEN VW_DADOS_CLIENTE. "vdclicli_classe" = 20 THEN 0 
               ELSE 1 
        END AS ativo, 
-       trim(REPEAT('0', 4 - Length(Cast( cadcli01. "vdclicli_regi" AS CHAR( 4)))) || Cast( cadcli01. "vdclicli_regi" AS CHAR( 4))) ||
-	   trim(repeat('0', 4-length(Cast( cadcli01. "vdclicli_num" AS CHAR( 4)))) || Cast( cadcli01. "vdclicli_num" AS CHAR( 4)))   AS codigo_cliente_erp, 
+       trim(REPEAT('0', 4 - Length(Cast( VW_DADOS_CLIENTE. "vdclicli_regi" AS CHAR( 4)))) || Cast( VW_DADOS_CLIENTE. "vdclicli_regi" AS CHAR( 4))) ||
+	   trim(repeat('0', 4-length(Cast( VW_DADOS_CLIENTE. "vdclicli_num" AS CHAR( 4)))) || Cast( VW_DADOS_CLIENTE. "vdclicli_num" AS CHAR( 4)))   AS codigo_cliente_erp, 
        NULL                        AS bonus_disponivel, 
-       cadcli01. "vdclicli_classe" AS classe, 
+       VW_DADOS_CLIENTE. "vdclicli_classe" AS classe, 
        Cast(vdparoco_anotab_carga AS VARCHAR(4)) 
               || 
        CASE 
@@ -272,8 +268,8 @@ CREATE OR replace VIEW  vw_cliente AS SELECT 0 AS abate_icms,
                             ||Cast(vdparoco_mestab_carga AS VARCHAR(2)) 
               ELSE Cast(vdparoco_mestab_carga AS            VARCHAR(2)) 
        END 
-              || RIGHT(Cast(cadcli01.vdclicli_tbprd AS VARCHAR(8)),2) AS codigo_tabpreco, 
-       cadcli01. "vdclicli_contato"                                   AS contato, 
+              || RIGHT(Cast(VW_DADOS_CLIENTE.vdclicli_tbprd AS VARCHAR(8)),2) AS codigo_tabpreco, 
+       VW_DADOS_CLIENTE. "vdclicli_contato"                                   AS contato, 
        CASE 
 	      WHEN length(CAST(vdclicli_cgc as varchar(15))) <= 5 THEN 
 	         REPEAT('0' ,15 -Length(CAST(vdclicli_cgc as varchar(15)))) || CAST(vdclicli_cgc as varchar(15))		  
@@ -284,54 +280,54 @@ CREATE OR replace VIEW  vw_cliente AS SELECT 0 AS abate_icms,
           ELSE 	  
 			CAST(vdclicli_cgc as varchar(15))		    
        END   AS cpf_cnpj, 
-       cadcli01. "vdclicli_abona_tx_financ"                           AS despreza_taxa_financeira,
+       VW_DADOS_CLIENTE. "vdclicli_abona_tx_financ"                           AS despreza_taxa_financeira,
        0                                                              AS dia_semana, 
-       cadcli01. "vdclicli_dias_entrega"                              AS dias_entrega , 
-       cadcli01. "vdclicli_email"                                     AS email, 
-       cadcli01. "vdclicli_ignora_banda_preco"                        AS ignora_banda_preco, 
+       VW_DADOS_CLIENTE. "vdclicli_dias_entrega"                              AS dias_entrega , 
+       VW_DADOS_CLIENTE. "vdclicli_email"                                     AS email, 
+       VW_DADOS_CLIENTE. "vdclicli_ignora_banda_preco"                        AS ignora_banda_preco, 
        NULL                                                           AS inconformidade_cadastro,
-       cadcli01. "vdclicli_credito"                                   AS limite_credito , 
+       VW_DADOS_CLIENTE. "vdclicli_credito"                                   AS limite_credito , 
 	   CASE 
-	      WHEN cadcli01. "vdclicli_motblo" = '   ' THEN 
+	      WHEN VW_DADOS_CLIENTE. "vdclicli_motblo" = '   ' THEN 
 			''
 		  ELSE
-		    REPEAT('0', 3 -Length(cadcli01. "vdclicli_motblo") ) ||   cadcli01. "vdclicli_motblo" 
+		    REPEAT('0', 3 -Length(VW_DADOS_CLIENTE. "vdclicli_motblo") ) ||   VW_DADOS_CLIENTE. "vdclicli_motblo" 
        END AS motivo_bloq_classe_20, 
-       cadcli01. "vdclicli_motblo_jur"                                AS motivo_bloqueio_juridico,
-       cadcli01. "vdclicli_num"                                       AS numero_cliente , 
-       cadcli01. "vdclicli_codpasta1"                                 AS pasta, 
-       cadcli01. "vdclicli_razao50"                                   AS razao_social , 
-       cadcli01. "vdclicli_regi"                                      AS regiao_cliente , 
+       VW_DADOS_CLIENTE. "vdclicli_motblo_jur"                                AS motivo_bloqueio_juridico,
+       VW_DADOS_CLIENTE. "vdclicli_num"                                       AS numero_cliente , 
+       VW_DADOS_CLIENTE. "vdclicli_codpasta1"                                 AS pasta, 
+       VW_DADOS_CLIENTE. "vdclicli_razao50"                                   AS razao_social , 
+       VW_DADOS_CLIENTE. "vdclicli_regi"                                      AS regiao_cliente , 
        NULL                                                           AS registro_alterado, 
-       cadcli01. "vdclicli_restr_comerciais"                          AS restircao_comercial, 
-       cadcli01. "vdclicli_sigla"                                     AS sigla, 
-       cadcli01. "vdclicli_subcanal"                                  AS sub_canal, 
+       VW_DADOS_CLIENTE. "vdclicli_restr_comerciais"                          AS restircao_comercial, 
+       VW_DADOS_CLIENTE. "vdclicli_sigla"                                     AS sigla, 
+       VW_DADOS_CLIENTE. "vdclicli_subcanal"                                  AS sub_canal, 
        CASE 
-              WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR(12)), 1, 2)
+              WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12)), 1, 2)
               ELSE '0' 
        END AS telefone_ddd, 
        CASE 
-              WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( cadcli01. "vdclicli_fone" AS CHAR ( 12))
+              WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR ( 12))
               ELSE 
                      CASE 
-                            WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS   CHAR(12 ))) = 1 THEN '0'
-                            ELSE Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR( 12)), 3, 11 )
+                            WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS   CHAR(12 ))) = 1 THEN '0'
+                            ELSE Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 3, 11 )
                      END 
        END                                  AS telefone_tronco, 
-       cadcli01. "vdclicli_verba_fin_pro"   AS uso_verba_restrito_produto, 
-       cadcli01. "vdclicli_cat"             AS codigo_canal_erp, 
-       cadcli01. "vdclicli_cpg"             AS codigo_condicao_pagamento_erp, 
-       cadcli01. "vdclicli_tpcobra"         AS codigo_tipo_cobranca_erp , 
-       cadcli01. "vdclicli_disp_portal_web" AS disponivel_portal ,
-	   cadcli01."VDCLICLI_CEL1" as celular
-FROM    cadcli01 , 
+       VW_DADOS_CLIENTE. "vdclicli_verba_fin_pro"   AS uso_verba_restrito_produto, 
+       VW_DADOS_CLIENTE. "vdclicli_cat"             AS codigo_canal_erp, 
+       VW_DADOS_CLIENTE. "vdclicli_cpg"             AS codigo_condicao_pagamento_erp, 
+       VW_DADOS_CLIENTE. "vdclicli_tpcobra"         AS codigo_tipo_cobranca_erp , 
+       VW_DADOS_CLIENTE. "vdclicli_disp_portal_web" AS disponivel_portal ,
+	   VW_DADOS_CLIENTE."VDCLICLI_CEL1" as celular
+FROM    VW_DADOS_CLIENTE , 
         paroco01 
 WHERE  
-    cadcli01."VDCLICLI_VEN" <> '   ' and 
+    VW_DADOS_CLIENTE."VDCLICLI_VEN" <> '   ' and 
     ( 
               Cast(
-			  trim(REPEAT('0', 4 - Length(Cast( cadcli01. "vdclicli_regi" AS CHAR( 4)))) || Cast( cadcli01. "vdclicli_regi" AS CHAR( 4))) ||
-			  trim(repeat('0', 4-length(Cast( cadcli01. "vdclicli_num" AS CHAR( 4)))) || Cast( cadcli01. "vdclicli_num" AS CHAR( 4))) 
+			  trim(REPEAT('0', 4 - Length(Cast( VW_DADOS_CLIENTE. "vdclicli_regi" AS CHAR( 4)))) || Cast( VW_DADOS_CLIENTE. "vdclicli_regi" AS CHAR( 4))) ||
+			  trim(repeat('0', 4-length(Cast( VW_DADOS_CLIENTE. "vdclicli_num" AS CHAR( 4)))) || Cast( VW_DADOS_CLIENTE. "vdclicli_num" AS CHAR( 4))) 
 			  AS INTEGER) = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = 0 );
 
 DECLARE SET INT @codigo_cev = 0;
@@ -420,64 +416,64 @@ CREATE
 or replace VIEW  VW_ENDERECO AS
 SELECT
     1 AS ATIVO,
-    cadcli01."vdclicli_baifat" AS BAIRRO,
-    cadcli01."vdclicli_cepfat" AS CEP_ENDERECO,
-    cadcli01."vdclicli_endfat" AS ENDERECO,
-    cadcli01."vdclicli_munfat" AS MUNICIPIO,
-    cadcli01."vdclicli_endfat_nr" AS NUMERO,
-    cadcli01.VDCLICLI_PTOREF AS PONTO_REFERENCIA,
-    cadcli01."vdclicli_estfat" AS UTF_ENDERECO,
-	cadcli01."vdclicli_endfat_compl" AS COMPLEMENTO,
+    VW_DADOS_CLIENTE."vdclicli_baifat" AS BAIRRO,
+    VW_DADOS_CLIENTE."vdclicli_cepfat" AS CEP_ENDERECO,
+    VW_DADOS_CLIENTE."vdclicli_endfat" AS ENDERECO,
+    VW_DADOS_CLIENTE."vdclicli_munfat" AS MUNICIPIO,
+    VW_DADOS_CLIENTE."vdclicli_endfat_nr" AS NUMERO,
+    VW_DADOS_CLIENTE.VDCLICLI_PTOREF AS PONTO_REFERENCIA,
+    VW_DADOS_CLIENTE."vdclicli_estfat" AS UTF_ENDERECO,
+	VW_DADOS_CLIENTE."vdclicli_endfat_compl" AS COMPLEMENTO,
     1 AS ORIGEM_LOGRADOURO_ERP,
     Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4)) END,
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
     ) AS codigo_cliente_erp,
-    cadcli01."vdclicli_endfat_tip" AS SIGLA_LOGRADOURO_ERP
+    VW_DADOS_CLIENTE."vdclicli_endfat_tip" AS SIGLA_LOGRADOURO_ERP
 FROM
-     CADCLI01
+     VW_DADOS_CLIENTE
 WHERE
     (
         Cast(
             Concat(
-                CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 1 THEN Concat(
+                CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 1 THEN Concat(
                     '000',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 2 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 2 THEN Concat(
                     '00',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 3 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 3 THEN Concat(
                     '0',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR (4)) END,
-                CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR (4)) END,
+                CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
                     '000',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
                     '00',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
                     '0',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
             ) AS INTEGER
         ) = @CODIGO_CLIENTE
         OR @CODIGO_CLIENTE = 0
@@ -485,64 +481,64 @@ WHERE
 UNION ALL
 SELECT
     1 AS ATIVO,
-    cadcli01."vdclicli_baicob" AS BAIRRO,
-    cadcli01."vdclicli_cepcob" AS CEP_ENDERECO,
-    cadcli01."vdclicli_endcob" AS ENDERECO,
-    cadcli01."vdclicli_muncob" AS MUNICIPIO,
-    cadcli01."vdclicli_endcob_nr" AS NUMERO,
+    VW_DADOS_CLIENTE."vdclicli_baicob" AS BAIRRO,
+    VW_DADOS_CLIENTE."vdclicli_cepcob" AS CEP_ENDERECO,
+    VW_DADOS_CLIENTE."vdclicli_endcob" AS ENDERECO,
+    VW_DADOS_CLIENTE."vdclicli_muncob" AS MUNICIPIO,
+    VW_DADOS_CLIENTE."vdclicli_endcob_nr" AS NUMERO,
     NULL AS PONTO_REFERENCIA,
-    cadcli01."vdclicli_estcob" AS UTF_ENDERECO,
-	cadcli01."vdclicli_endcob_compl" AS COMPLEMENTO,
+    VW_DADOS_CLIENTE."vdclicli_estcob" AS UTF_ENDERECO,
+	VW_DADOS_CLIENTE."vdclicli_endcob_compl" AS COMPLEMENTO,
     2 AS ORIGEM_LOGRADOURO_REC_ID,
     Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4)) END,
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
     ) AS codigo_cliente_erp,
-    cadcli01."vdclicli_endcob_tip" AS SIGLA_LOGRADOURO_REC_ID
+    VW_DADOS_CLIENTE."vdclicli_endcob_tip" AS SIGLA_LOGRADOURO_REC_ID
 FROM
-     CADCLI01
+     VW_DADOS_CLIENTE
 WHERE
     (
         Cast(
             Concat(
-                CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 1 THEN Concat(
+                CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 1 THEN Concat(
                     '000',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 2 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 2 THEN Concat(
                     '00',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 3 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 3 THEN Concat(
                     '0',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR (4)) END,
-                CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR (4)) END,
+                CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
                     '000',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
                     '00',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
                     '0',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
             ) AS INTEGER
         ) = @CODIGO_CLIENTE
         OR @CODIGO_CLIENTE = 0
@@ -550,64 +546,64 @@ WHERE
 UNION ALL
 SELECT
     1 AS ATIVO,
-    cadcli01."vdclicli_baient" AS BAIRRO,
-    cadcli01."vdclicli_cepent" AS CEP_ENDERECO,
-    cadcli01."vdclicli_endent" AS ENDERECO,
-    cadcli01."vdclicli_munent" AS MUNICIPIO,
-    cadcli01."vdclicli_endent_nr" AS NUMERO,
+    VW_DADOS_CLIENTE."vdclicli_baient" AS BAIRRO,
+    VW_DADOS_CLIENTE."vdclicli_cepent" AS CEP_ENDERECO,
+    VW_DADOS_CLIENTE."vdclicli_endent" AS ENDERECO,
+    VW_DADOS_CLIENTE."vdclicli_munent" AS MUNICIPIO,
+    VW_DADOS_CLIENTE."vdclicli_endent_nr" AS NUMERO,
 	NULL AS PONTO_REFERENCIA,    	
-    cadcli01."vdclicli_estent" AS UTF_ENDERECO,	
-	cadcli01."vdclicli_endent_compl" AS COMPLEMENTO,
+    VW_DADOS_CLIENTE."vdclicli_estent" AS UTF_ENDERECO,	
+	VW_DADOS_CLIENTE."vdclicli_endent_compl" AS COMPLEMENTO,
     3 AS ORIGEM_LOGRADOURO_REC_ID,
     Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4)) END,
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
     ) AS codigo_cliente_erp,
-    cadcli01."vdclicli_endent_tip" AS SIGLA_LOGRADOURO_REC_ID
+    VW_DADOS_CLIENTE."vdclicli_endent_tip" AS SIGLA_LOGRADOURO_REC_ID
 FROM
-     CADCLI01
+     VW_DADOS_CLIENTE
 WHERE
     (
         Cast(
             Concat(
-                CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 1 THEN Concat(
+                CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 1 THEN Concat(
                     '000',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 2 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 2 THEN Concat(
                     '00',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 3 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 3 THEN Concat(
                     '0',
-                    Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR (4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR (4)) END,
-                CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR (4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR (4)) END,
+                CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
                     '000',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
                     '00',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
                     '0',
-                    Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-                ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+                    Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+                ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
             ) AS INTEGER
         ) = @CODIGO_CLIENTE
         OR @CODIGO_CLIENTE = 0
@@ -1027,94 +1023,40 @@ WHERE
   (Cast(vdpedcpe_nped AS VARCHAR(12)) = @CODIGO_PEDIDO OR @CODIGO_PEDIDO = '') AND
   ((vdpedcpe_fl IN (7,5,4,3,2,1) AND @CODIGO_PEDIDO = '') OR (vdpedcpe_fl IN (7,5,4,3,2,1,0) AND @CODIGO_PEDIDO <> ''));
 
-CREATE
-or replace VIEW  VW_PEDIDO_SUGESTAO AS
+CREATE OR REPLACE VIEW VW_PEDIDO_SUGESTAO AS
 SELECT
-    '0' AS COD_CLIENTE,
-    VDCLPV01."VDCLIPVC_CODCAT" AS COD_CANAL,
-    (
-        SELECT
-            CADPRD01."VDPRDPRD_CODR"
-        FROM
-             CADPRD01
-        WHERE
-            CADPRD01."VDPRDPRD_CFAM" = CAST(
-                LEFT(
-                    CONCAT(
-                        REPEAT(
-                            '0',
-                            6 - LENGTH(CAST(VDCLIPVC_CODPRD AS VARCHAR(6)))
-                        ),
-                        CAST(VDCLIPVC_CODPRD AS VARCHAR(6))
-                    ),
-                    3
-                ) AS INT
-            )
-            AND CADPRD01."VDPRDPRD_NRO" = CAST(
-                RIGHT(
-                    CONCAT(
-                        REPEAT(
-                            '0',
-                            6 - LENGTH(CAST(VDCLIPVC_CODPRD AS VARCHAR(6)))
-                        ),
-                        CAST(VDCLIPVC_CODPRD AS VARCHAR(6))
-                    ),
-                    3
-                ) AS INT
-            )
-    ) AS COD_PRODUTO_REDUZIDO,
-    VDCLPV01."VDCLIPVC_SUG_QTDECX" AS QTD_CX,
-    VDCLPV01."VDCLIPVC_SUG_QTDEUN" AS QTD_AV
+  '0' AS COD_CLIENTE,
+  VDCLIPVC_CODCAT COD_CANAL,
+  (SELECT
+     VDPRDPRD_CODR
+   FROM
+     CADPRD01
+   WHERE
+     VDPRDPRD_CFAM = CAST(LEFT(CONCAT(REPEAT('0',6-LENGTH(CAST(VDCLIPVC_CODPRD AS VARCHAR(6)))),CAST(VDCLIPVC_CODPRD AS VARCHAR(6))),3) AS INT) AND
+     VDPRDPRD_NRO = CAST(RIGHT(CONCAT(REPEAT('0',6-LENGTH(CAST(VDCLIPVC_CODPRD AS VARCHAR(6)))),CAST(VDCLIPVC_CODPRD AS VARCHAR(6))),3) AS INT)
+  ) COD_PRODUTO_REDUZIDO,
+  VDCLIPVC_SUG_QTDECX QTD_CX,
+  VDCLIPVC_SUG_QTDEUN QTD_AV
 FROM
-     VDCLPV01
+  VDCLPV01
 UNION ALL
-SELECT
-    CASE WHEN LENGTH(CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8))) = 5 THEN CONCAT(
-        '000',
-        CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8))
-    ) WHEN LENGTH(CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8))) = 6 THEN CONCAT(
-        '00',
-        CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8))
-    ) WHEN LENGTH(CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8))) = 7 THEN CONCAT(
-        '0',
-        CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8))
-    ) ELSE CAST(CLCVTE01."VDCLCVTE_CODCLI" AS VARCHAR(8)) END AS COD_CLIENTE,
-    '00' AS COD_CANAL,
-    (
-        SELECT
-            CADPRD01."VDPRDPRD_CODR"
-        FROM
-             CADPRD01
-        WHERE
-            CADPRD01."VDPRDPRD_CFAM" = CAST(
-                LEFT(
-                    CONCAT(
-                        REPEAT(
-                            '0',
-                            6 - LENGTH(CAST(VDCLCVTE_CODPRD AS VARCHAR(6)))
-                        ),
-                        CAST(VDCLCVTE_CODPRD AS VARCHAR(6))
-                    ),
-                    3
-                ) AS INT
-            )
-            AND CADPRD01."VDPRDPRD_NRO" = CAST(
-                RIGHT(
-                    CONCAT(
-                        REPEAT(
-                            '0',
-                            6 - LENGTH(CAST(VDCLCVTE_CODPRD AS VARCHAR(6)))
-                        ),
-                        CAST(VDCLCVTE_CODPRD AS VARCHAR(6))
-                    ),
-                    3
-                ) AS INT
-            )
-    ) AS COD_PRODUTO_REDUZIDO,
-    CLCVTE01."VDCLCVTE_SUG_QTDCX" AS QTD_CX,
-    CLCVTE01."VDCLCVTE_SUG_QTDUN" AS QTD_AV
+SELECT    
+  CODIGO_CLIENTE COD_CLIENTE,    
+  '00' AS COD_CANAL,
+  (SELECT
+     VDPRDPRD_CODR
+   FROM
+     CADPRD01
+   WHERE
+     VDPRDPRD_CFAM = CAST(LEFT(CONCAT(REPEAT('0',6-LENGTH(CAST(VDCLCVTE_CODPRD AS VARCHAR(6)))),CAST(VDCLCVTE_CODPRD AS VARCHAR(6))),3) AS INT) AND
+     VDPRDPRD_NRO = CAST(RIGHT(CONCAT(REPEAT('0',6-LENGTH(CAST(VDCLCVTE_CODPRD AS VARCHAR(6)))),CAST(VDCLCVTE_CODPRD AS VARCHAR(6))),3) AS INT)
+  ) COD_PRODUTO_REDUZIDO,
+  VDCLCVTE_SUG_QTDCX QTD_CX,
+  VDCLCVTE_SUG_QTDUN QTD_AV
 FROM
-     CLCVTE01 ;
+  CLCVTE01
+INNER JOIN
+  VW_DADOS_CLIENTE ON VDCLICLI_REGI = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDCLCVTE_CODCLI AS VARCHAR(8)))) || CAST(VDCLCVTE_CODCLI AS VARCHAR(8)),1,4) AS INT) AND VDCLICLI_NUM = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDCLCVTE_CODCLI AS VARCHAR(8)))) || CAST(VDCLCVTE_CODCLI AS VARCHAR(8)),5,4) AS INT);
 
 DECLARE SET BIGINT @COD_PRODUTO = 0;
 DECLARE SET BIGINT @COD_TABELA = 0;
@@ -1872,7 +1814,7 @@ SELECT
     tpcobr01."vdcadtco_perm06" AS PERM06,
     tpcobr01."vdcadtco_perm07" AS PERM07,
     tpcobr01."vdcadtco_perm08" AS PERM08,
-    tpcobr01."vdcadtco_perm09" AS PERM09              
+    tpcobr01."vdcadtco_perm09" AS PERM09             
 FROM tpcobr01
 WHERE
     (
@@ -1888,53 +1830,53 @@ or replace VIEW  VW_TIPO_COBRANCA_CLIENTE AS
 SELECT
     1 AS ATIVO,
     Concat(
-        CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR(4)) END,
-        CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4)) END,
+        CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
             '000',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
             '00',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
             '0',
-            Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-        ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+            Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+        ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
     ) AS CODIGO_CLIENTE_ERP,
-    cadcli01."vdclicli_tpcobra" AS CODIGO_TIPO_COBRANCA_ERP
+    VW_DADOS_CLIENTE."vdclicli_tpcobra" AS CODIGO_TIPO_COBRANCA_ERP
 FROM
-     CADCLI01
+     VW_DADOS_CLIENTE
 WHERE
     (
         Concat(
-            CASE WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
+            CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 1 THEN Concat(
                 '000',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
+                Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+            ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 2 THEN Concat(
                 '00',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
+                Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+            ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 3 THEN Concat(
                 '0',
-                Cast(cadcli01."vdclicli_regi" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_regi" AS VARCHAR (4)) END,
-            CASE WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
+                Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR(4))
+            ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_regi" AS VARCHAR (4)) END,
+            CASE WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 1 THEN Concat(
                 '000',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
+                Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+            ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 2 THEN Concat(
                 '00',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
+                Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+            ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 3 THEN Concat(
                 '0',
-                Cast(cadcli01."vdclicli_num" AS VARCHAR(4))
-            ) WHEN Length(Cast(cadcli01."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(cadcli01."vdclicli_num" AS VARCHAR (4)) END
+                Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR(4))
+            ) WHEN Length(Cast(VW_DADOS_CLIENTE."vdclicli_num" AS CHAR(4))) = 4 THEN Cast(VW_DADOS_CLIENTE."vdclicli_num" AS VARCHAR (4)) END
         ) = @codigoclienteerp OR @codigoclienteerp = ''
     );
 
@@ -2004,8 +1946,8 @@ SELECT
   1 ATIVO,
   CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
   1 VENDEDOR,
-  CODIGO_VENDEDOR CODIGO_VENDEDOR_ERP,
-  NUMERO_PASTA PASTA_VISITA
+  VDCLICLI_VEN CODIGO_VENDEDOR_ERP,
+  VDCLICLI_CODPASTA1 PASTA_VISITA
 FROM
   VW_DADOS_CLIENTE
 WHERE
@@ -2015,45 +1957,45 @@ SELECT
   1 ATIVO,
   CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
   2 VENDEDOR,
-  CODIGO_VENDEDOR2 CODIGO_VENDEDOR_ERP,
-  NUMERO_PASTA2 PASTA_VISITA
+  VDCLICLI_VEN2 CODIGO_VENDEDOR_ERP,
+  VDCLICLI_CODPASTA2 PASTA_VISITA
 FROM
   VW_DADOS_CLIENTE
 WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR2 <> ''    
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN2 <> ''    
 UNION ALL
 SELECT
   1 ATIVO,
   CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
   3 VENDEDOR,
-  CODIGO_VENDEDOR3 CODIGO_VENDEDOR_ERP,
-  NUMERO_PASTA3 PASTA_VISITA
+  VDCLICLI_VEN3 CODIGO_VENDEDOR_ERP,
+  VDCLICLI_CODPASTA3 PASTA_VISITA
 FROM
   VW_DADOS_CLIENTE
 WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR3 <> ''    
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN3 <> ''    
 UNION ALL
 SELECT
   1 ATIVO,
   CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
   4 VENDEDOR,
-  CODIGO_VENDEDOR4 CODIGO_VENDEDOR_ERP,
-  NUMERO_PASTA4 PASTA_VISITA
+  VDCLICLI_VEN4 CODIGO_VENDEDOR_ERP,
+  VDCLICLI_CODPASTA4 PASTA_VISITA
 FROM
   VW_DADOS_CLIENTE
 WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR4 <> ''
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN4 <> ''
 UNION ALL    
 SELECT
   1 ATIVO,
   CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
   5 VENDEDOR,
-  CODIGO_VENDEDOR5 CODIGO_VENDEDOR_ERP,
-  NUMERO_PASTA5 PASTA_VISITA
+  VDCLICLI_VEN5 CODIGO_VENDEDOR_ERP,
+  VDCLICLI_CODPASTA5 PASTA_VISITA
 FROM
   VW_DADOS_CLIENTE
 WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND CODIGO_VENDEDOR5 <> '';    
+  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN5 <> '';    
 
 
 declare set int @pasta = 0;
@@ -3127,13 +3069,18 @@ SELECT
 FROM
   CADOCO01;
 
+DECLARE SET BIGINT @numero_pedido = 0;
+
 CREATE
-or replace VIEW  VW_DADOS_HISTORICO_PEDIDO_CAPA AS
+or replace VIEW VW_HISTORICO_PEDIDO_CAPA AS
 SELECT
     CASE WHEN vdpedcpe_fl = 9 THEN 0 ELSE 1 END AS ATIVO,
     vdpedcpe_motdev CODIGO_MOTIVO_DEVOLUCAO,
-    vdpedcpe_dtemiped DATA_HORA_EMISSAO_PEDIDO,
-    vdpedcpe_dt1vc DATA_VENCIMENTO,
+    TO_DATE(SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),1,4), 'DDMMYYYY') AS DATA_HORA_EMISSAO_PEDIDO,
+    CASE
+    WHEN vdpedcpe_dt1vc = 0 THEN TO_DATE(SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),1,4), 'DDMMYYYY')
+    ELSE
+    TO_DATE(SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),1,4), 'DDMMYYYY') END AS DATA_VENCIMENTO,
     vdpedcpe_descfi DESCONTO_FINANCEIRO,
     vdpedcpe_nped NUMERO_PEDIDO,
     vdpedcpe_desc PERCENTUAL_DESCONTO,
@@ -3142,10 +3089,13 @@ SELECT
     numero_pedido_erp_reprogramado,
     vdpedcpe_vlr_fcem_r + vdpedcpe_vlr_fsem_r + vdpedcpe_vlr_fctr_r + vdpedcpe_vlr_fstr_r VALOR_DEVOLUCAO,
     vdpedcpe_vlr_fcem + vdpedcpe_vlr_fsem + vdpedcpe_vlr_fctr + vdpedcpe_vlr_fstr VALOR_PEDIDO,
-    CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST(VDPEDCPE_CODCLI AS VARCHAR(8)) ,1,4) AS INT) REG_CLI_PED,
-    CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST(VDPEDCPE_CODCLI AS VARCHAR(8)),5,4) AS INT) NUM_CLI_PED,
+    CODIGO_CLIENTE CODIGO_CLIENTE_REC_ID,
     vdpedcpe_cpg CODIGO_CONDICAO_PAGAMENTO_REC_ID,
     vdpedcpe_tpcobr CODIGO_TIPO_COBRANCA_REC_ID,
+    VDCLICLI_CGC CNPJ_CPF,
+    VDCLICLI_RAZAO50 RAZAO_CLIENTE,
+    (SELECT VDCADPAG_DESCR FROM CONDPG01 WHERE vdcadpag_cod = vdpedcpe_cpg) DESCRICAO_CONDICAO_PAGAMENTO,
+    (SELECT vdcadtco_descricao FROM TPCOBR01 WHERE VDCADTCO_COD = vdpedcpe_tpcobr) DESCRICAO_TIPO_COBRANCA,
     VDPEDCPE_SERIE SFISCAL,
     VDPEDCPE_NFIS NFISCAL_INI,
     VDPEDCPE_NFISULT NFISCAL_ULT
@@ -3153,45 +3103,12 @@ FROM
   PEDCP01
 INNER JOIN
   VW_DADOS_VDPEDFLC ON NUMERO_PEDIDO_VDPEDFLC = VDPEDCPE_NPED
-WHERE 
-  vdpedcpe_nped >= cast(trim(DATETOSTR(Curdate()-45,'yyyymmdd')) || '0000' as bigint);
-
-DECLARE SET BIGINT @numero_pedido = 0;
-
-CREATE
-or replace VIEW VW_HISTORICO_PEDIDO_CAPA AS
-SELECT
-    ATIVO,
-    CODIGO_MOTIVO_DEVOLUCAO,
-    TO_DATE(SUBSTRING(cast(DATA_HORA_EMISSAO_PEDIDO as varchar(8)),7,2) || SUBSTRING(cast(DATA_HORA_EMISSAO_PEDIDO as varchar(8)),5,2) || SUBSTRING(cast(DATA_HORA_EMISSAO_PEDIDO as varchar(8)),1,4), 'DDMMYYYY') AS DATA_HORA_EMISSAO_PEDIDO,
-    CASE
-    WHEN DATA_VENCIMENTO = 0 THEN TO_DATE(SUBSTRING(cast(DATA_HORA_EMISSAO_PEDIDO as varchar(8)),7,2) || SUBSTRING(cast(DATA_HORA_EMISSAO_PEDIDO as varchar(8)),5,2) || SUBSTRING(cast(DATA_HORA_EMISSAO_PEDIDO as varchar(8)),1,4), 'DDMMYYYY')
-    ELSE
-    TO_DATE(SUBSTRING(cast(DATA_VENCIMENTO as varchar(8)),7,2) || SUBSTRING(cast(DATA_VENCIMENTO as varchar(8)),5,2) || SUBSTRING(cast(DATA_VENCIMENTO as varchar(8)),1,4), 'DDMMYYYY') END AS DATA_VENCIMENTO,
-    DESCONTO_FINANCEIRO,
-    NUMERO_PEDIDO,
-    PERCENTUAL_DESCONTO,
-    STATUS_PEDIDO,
-    TAXA_FINANCEIRO,
-    numero_pedido_erp_reprogramado,
-    VALOR_DEVOLUCAO,
-    VALOR_PEDIDO,
-    CODIGO_CLIENTE CODIGO_CLIENTE_REC_ID,
-    CODIGO_CONDICAO_PAGAMENTO_REC_ID,
-    CODIGO_TIPO_COBRANCA_REC_ID,
-    CNPJ_CPF,
-    RAZAO_CLIENTE,
-    (SELECT VDCADPAG_DESCR FROM CONDPG01 WHERE vdcadpag_cod = CODIGO_CONDICAO_PAGAMENTO_REC_ID) DESCRICAO_CONDICAO_PAGAMENTO,
-    (SELECT vdcadtco_descricao FROM TPCOBR01 WHERE VDCADTCO_COD = CODIGO_TIPO_COBRANCA_REC_ID) DESCRICAO_TIPO_COBRANCA,
-    SFISCAL,
-    NFISCAL_INI,
-    NFISCAL_ULT
-FROM
-  VW_DADOS_HISTORICO_PEDIDO_CAPA
-INNER JOIN
-  VW_DADOS_CLIENTE ON REGIAO_CLIENTE = REG_CLI_PED AND NUMERO_CLIENTE = NUM_CLI_PED;
+INNER JOIN 
+  VW_DADOS_CLIENTE ON VDCLICLI_REGI = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST(VDPEDCPE_CODCLI AS VARCHAR(8)),1,4) AS INT) AND VDCLICLI_NUM = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST(VDPEDCPE_CODCLI AS VARCHAR(8)),5,4) AS INT)
 WHERE
-    (NUMERO_PEDIDO = @numero_pedido OR @numero_pedido = 0);
+  vdpedcpe_nped >= cast(trim(DATETOSTR(Curdate()-45,'yyyymmdd')) || '0000' as bigint) AND
+  (VDPEDCPE_NPED = @numero_pedido OR @numero_pedido = 0) AND
+  CAST(SUBSTRING(CAST(VDPEDCPE_NPED AS VARCHAR(12)),9,4) AS INT) BETWEEN 1 AND 9999;
 
 DECLARE SET BIGINT @NUMERO_PEDIDO = 0;
 
@@ -3218,7 +3135,21 @@ WHERE
 
 declare set varchar(8) @codigo_cliente = '';
 declare set int @CODIGO_GRUPO_ANALISE = 0;
-CREATE OR REPLACE VIEW  VW_GRUPO_ANALISE AS SELECT VDCLIROC_ROMA CODIGO_GRUPO_ANALISE, CODIGO_CLIENTE FROM  ROCLI01 LEFT JOIN  VW_DADOS_CLIENTE ON REGIAO_CLIENTE = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDCLIROC_CCLI AS VARCHAR(8)))) || CAST(VDCLIROC_CCLI AS VARCHAR(8)) ,1,4) AS INT) AND NUMERO_CLIENTE = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDCLIROC_CCLI AS VARCHAR(8)))) || CAST(VDCLIROC_CCLI AS VARCHAR(8)),5,4) AS INT) WHERE VDCLIROC_CCLI > 0 AND CODIGO_CLIENTE IS NOT NULL AND (codigo_cliente = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '' ) AND (vdcliroc_roma = @CODIGO_GRUPO_ANALISE OR @CODIGO_GRUPO_ANALISE = 0);
+CREATE OR REPLACE VIEW  VW_GRUPO_ANALISE AS 
+SELECT 
+  VDCLIROC_ROMA CODIGO_GRUPO_ANALISE,
+  CODIGO_CLIENTE 
+FROM 
+  ROCLI01 
+INNER JOIN  
+  VW_DADOS_CLIENTE 
+ON 
+  VDCLICLI_REGI = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDCLIROC_CCLI AS VARCHAR(8)))) || CAST(VDCLIROC_CCLI AS VARCHAR(8)) ,1,4) AS INT) AND 
+  VDCLICLI_NUM = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDCLIROC_CCLI AS VARCHAR(8)))) || CAST(VDCLIROC_CCLI AS VARCHAR(8)),5,4) AS INT) 
+WHERE 
+  VDCLIROC_CCLI > 0 AND
+  (codigo_cliente = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '' ) AND 
+  (vdcliroc_roma = @CODIGO_GRUPO_ANALISE OR @CODIGO_GRUPO_ANALISE = 0);
 
 DECLARE SET VARCHAR(3) @CODIGO_TIPO_PRODUTO = '';
 
@@ -3330,3 +3261,4 @@ FROM
   VDCLGM01
 WHERE 
   VDCLIGMP_COD = @CODIGO_MENSAGEM OR @CODIGO_MENSAGEM = 0; 
+

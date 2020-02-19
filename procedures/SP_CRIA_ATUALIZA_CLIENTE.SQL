@@ -1,732 +1,733 @@
 CREATE OR REPLACE PROCEDURE SP_CRIA_ATUALIZA_CLIENTE (IN NUMEROEMP SMALLINT,
-                                                      IN NOMECONTATO CHAR(050),
-                                                      IN EMAIL CHAR(060),
-                                                      IN CARGO CHAR(050),
-                                                      IN DDD_TEL SMALLINT,
-                                                      IN TEL INTEGER,
-                                                      IN DDD_CEL SMALLINT,
-                                                      IN CELULAR VARCHAR(12),
-                                                      IN RAZAO CHAR(050),
-                                                      IN NOMEFANTASIA CHAR(050),
-                                                      IN CNPJ_CPF VARCHAR(015),
-                                                      IN RG CHAR(009),
-                                                      IN LOGRADOUROFAT CHAR(050),
-                                                      IN TIPOLOGRADOUROFAT CHAR(050),
-                                                      IN NROFAT CHAR(010),
-                                                      IN PONTOREFERENCIAFAT CHAR(100),
-                                                      IN BAIRROFAT CHAR(050),
-                                                      IN MUNICIPIOFAT CHAR(050),
-                                                      IN UFFAT CHAR(002),
-                                                      IN CEPFAT INTEGER,
-                                                      IN TIPOLOGRADOUROCOB CHAR(050),
-                                                      IN LOGRADOUROCOB CHAR(050),
-                                                      IN NROCOB CHAR(010),
-                                                      IN PONTOREFERENCIACOB CHAR(100),
-                                                      IN BAIRROCOB CHAR(050),
-                                                      IN MUNICIPIOCOB CHAR(050),
-                                                      IN UFCOB CHAR(002),
-                                                      IN CEPCOB INTEGER,
-                                                      IN TIPOLOGRADOUROENT CHAR(050),
-                                                      IN LOGRADOUROENT CHAR(050),
-                                                      IN NROENT CHAR(010),
-                                                      IN PONTOREFERENCIAENT CHAR(100),
-                                                      IN BAIRROENT CHAR(050),
-                                                      IN MUNICIPIOENT CHAR(050),
-                                                      IN UFENT CHAR(002),
-                                                      IN CEPENT INTEGER,
-                                                      IN TABELAPRECO INTEGER,
-                                                      IN ORIGEM CHAR(001),
-                                                      IN codigoCanal CHAR(002),
-                                                      IN MotivoBloqClasse01 CHAR(003),
-                                                      IN inscricaoEstadual VARCHAR(015),
-                                                      IN condicaoPagamentoCliente SMALLINT,
-                                                      IN tipoClienteCobranca SMALLINT,
-                                                      IN subCanal SMALLINT,
-                                                      IN gpsLatitude DECIMAL(14,6),
-                                                      IN gpsLongitude DECIMAL(14,6),
-                                                      IN VENDEDOR CHAR(003),
-                                                      IN pasta INT,
-                                                      IN seqVisita SMALLINT,
-                                                      IN regiaoInclusao SMALLINT,
-                                                      IN classe INT,
-                                                      IN alterou INT,
-                                                      OUT STATUSMSG SMALLINT,
-                                                      OUT MSG VARCHAR(255))
+ IN NOMECONTATO CHAR(050),
+ IN EMAIL CHAR(060),
+ IN CARGO CHAR(050),
+ IN DDD_TEL SMALLINT,
+ IN TEL INTEGER,
+ IN DDD_CEL SMALLINT,
+ IN CELULAR VARCHAR(12),
+ IN RAZAO CHAR(050),
+ IN NOMEFANTASIA CHAR(050),
+ IN CNPJ_CPF VARCHAR(015),
+ IN RG CHAR(009),
+ IN TIPOLOGRADOUROFAT CHAR(050),
+ IN LOGRADOUROFAT CHAR(050),
+ IN NROFAT CHAR(010),
+ IN PONTOREFERENCIAFAT CHAR(100),
+ IN BAIRROFAT CHAR(050),
+ IN MUNICIPIOFAT CHAR(050),
+ IN UFFAT CHAR(002),
+ IN CEPFAT INTEGER,
+ IN TIPOLOGRADOUROCOB CHAR(050),
+ IN LOGRADOUROCOB CHAR(050),
+ IN NROCOB CHAR(010),
+ IN PONTOREFERENCIACOB CHAR(100),
+ IN BAIRROCOB CHAR(050),
+ IN MUNICIPIOCOB CHAR(050),
+ IN UFCOB CHAR(002),
+ IN CEPCOB INTEGER,
+ IN TIPOLOGRADOUROENT CHAR(050),
+ IN LOGRADOUROENT CHAR(050),
+ IN NROENT CHAR(010),
+ IN PONTOREFERENCIAENT CHAR(100),
+ IN BAIRROENT CHAR(050),
+ IN MUNICIPIOENT CHAR(050),
+ IN UFENT CHAR(002),
+ IN CEPENT INTEGER,
+ IN TABELAPRECO INTEGER,
+ IN ORIGEM CHAR(001),
+ IN codigoCanal CHAR(002),
+ IN MotivoBloqClasse01 CHAR(003),
+ IN inscricaoEstadual VARCHAR(015),
+ IN condicaoPagamentoCliente SMALLINT,
+ IN tipoClienteCobranca SMALLINT,
+ IN subCanal SMALLINT,
+ IN gpsLatitude DECIMAL(14,6),
+ IN gpsLongitude DECIMAL(14,6),
+ IN VENDEDOR CHAR(003),
+ IN pasta INT,
+ IN seqVisita SMALLINT,
+ IN regiaoInclusao SMALLINT,
+ IN classe INT,
+ IN alterou INT,
+ OUT STATUSMSG SMALLINT,
+ OUT MSG VARCHAR(255))
 
 LANGUAGE SQL
 
 BEGIN
-  DECLARE preClienteExiste  INTEGER;
-  DECLARE clienteExiste INTEGER;
-  DECLARE situacao CHAR(1);
-  DECLARE clienteNovo BIGINT;
-  DECLARE CGCNOVO VARCHAR(15);
-  
-  SET CGCNOVO = CNPJ_CPF;
-  
-  IF LENGTH(CGCNOVO) <= 11 THEN
-     SET CGCNOVO =  CONCAT(CONCAT(SUBSTRING(CGCNOVO,1,9),'0000'),SUBSTRING(CGCNOVO,10,2));       
-  END IF;
-  
-     
-  SET preClienteExiste = SELECT VDCLIPCL_CNPJ_CPF FROM VDCLIPCL WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT);
- 
-  SET clienteExiste = SELECT VDCLICLI_CGC FROM CADCLI01 WHERE VDCLICLI_CGC = CAST(CGCNOVO AS BIGINT);
+ DECLARE preClienteExiste INTEGER;
+ DECLARE clienteExiste INTEGER;
+ DECLARE situacao CHAR(1);
+ DECLARE clienteNovo BIGINT;
+ DECLARE CGCNOVO VARCHAR(15);
+ 
+ SET CGCNOVO = CNPJ_CPF;
+
+ IF LENGTH(CGCNOVO) <= 11 THEN
+ SET CGCNOVO = CONCAT(CONCAT(SUBSTRING(CGCNOVO,1,9),'0000'),SUBSTRING(CGCNOVO,10,2));
+ END IF;
+
+  
+ SET preClienteExiste = SELECT VDCLIPCL_CNPJ_CPF FROM VDCLIPCL WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT);
+
+ SET clienteExiste = SELECT VDCLICLI_CGC FROM CADCLI01 WHERE VDCLICLI_CGC = CAST(CGCNOVO AS BIGINT);
 
 
-  IF clienteExiste = NULL THEN
-     SET situacao  = '1';
-  ELSE
-     SET situacao = '2';
-  END IF;
+ IF clienteExiste = NULL THEN
+  SET situacao = '1';
+ ELSE
+  SET situacao = '2';
+ END IF;
 
-  IF preClienteExiste = NULL THEN
-     IF TIPOLOGRADOUROFAT = NULL OR
-        LOGRADOUROFAT = NULL OR
-        NROFAT = NULL OR
-        PONTOREFERENCIAFAT = NULL OR
-        BAIRROFAT = NULL OR
-        MUNICIPIOFAT = NULL OR
-        UFFAT = NULL OR
-        CEPFAT = NULL OR
-        CGCNOVO = NULL OR
-        TABELAPRECO = NULL OR
-        NUMEROEMP = NULL OR
-        ORIGEM = NULL THEN
-  
-        SET STATUSMSG = 0;
-        SET MSG = 'OS CAMPOS NUMEROEMP, ORIGEM, CGCNOVO,TIPOLOGRADOUROFAT, LOGRADOUROFAT, NROFAT, PONTOREFERENCIAFAT, BAIRROFAT, MUNICIPIOFAT, UFFAT, CEPFAT E TABELAPRECO SAO OBRIGATORIO';  
-     ELSE
-        IF UPPER(ORIGEM) = 'L' THEN
-           INSERT INTO VDCLIPCL (VDCLIPCL_NREMP,
-                                 VDCLIPCL_TIPO_LOGRADOURO_FAT,
-                                 VDCLIPCL_LOGRADOURO_FAT,
-                                 VDCLIPCL_NUMERO_FAT,
-                                 VDCLIPCL_PONTO_REFERENCIA_FAT,
-                                 VDCLIPCL_MUNICIPIO_FAT,
-                                 VDCLIPCL_BAIRRO_FAT,
-                                 VDCLIPCL_UF_FAT,
-                                 VDCLIPCL_CEP_FAT,
-                                 VDCLIPCL_TIPO_LOGRADOURO_COB,
-                                 VDCLIPCL_LOGRADOURO_COB,
-                                 VDCLIPCL_NUMERO_COB,
-                                 VDCLIPCL_PONTO_REFERENCIA_COB,
-                                 VDCLIPCL_MUNICIPIO_COB,
-                                 VDCLIPCL_BAIRRO_COB,
-                                 VDCLIPCL_UF_COB,
-                                 VDCLIPCL_CEP_COB,
-                                 VDCLIPCL_TIPO_LOGRADOURO_ENT,
-                                 VDCLIPCL_LOGRADOURO_ENT,
-                                 VDCLIPCL_NUMERO_ENT,
-                                 VDCLIPCL_PONTO_REFERENCIA_ENT,
-                                 VDCLIPCL_MUNICIPIO_ENT,
-                                 VDCLIPCL_BAIRRO_ENT,
-                                 VDCLIPCL_UF_ENT,
-                                 VDCLIPCL_CEP_ENT,
-                                 VDCLIPCL_NOME_CONTATO,
-                                 VDCLIPCL_CARGO,
-                                 VDCLIPCL_EMAIL,
-                                 VDCLIPCL_DDD_TEL,
-                                 VDCLIPCL_TELEFONE,
-                                 VDCLIPCL_DDD_CEL,
-                                 VDCLIPCL_CELULAR,
-                                 VDCLIPCL_RAZAO,
-                                 VDCLIPCL_NOME_FANTASIA,
-                                 VDCLIPCL_CNPJ_CPF,
-                                 VDCLIPCL_RG,
-                                 VDCLIPCL_SITUACAO,
-                                 VDCLIPCL_DATA_PROC,
-                                 VDCLIPCL_HORA_PROC,
-                                 VDCLIPCL_ORIGEM,
-                                 VDCLIPCL_INCLDT,
-                                 VDCLIPCL_INCLUSER,
-                                 VDCLIPCL_TBPRD,
-                                 VDCLIPCL_CPG,
-                                 VDCLIPCL_TPCOBRA)
-                         VALUES (NUMEROEMP,
-                                 UPPER(TIPOLOGRADOUROFAT),
-                                 UPPER(LOGRADOUROFAT),
-                                 UPPER(NROFAT),
-                                 UPPER(PONTOREFERENCIAFAT),
-                                 UPPER(MUNICIPIOFAT),
-                                 UPPER(BAIRROFAT),
-                                 UPPER(UFFAT),
-                                 CEPFAT,
-                                 UPPER(TIPOLOGRADOUROCOB),
-                                 UPPER(LOGRADOUROCOB),
-                                 UPPER(NROCOB),
-                                 UPPER(PONTOREFERENCIACOB),
-                                 UPPER(MUNICIPIOCOB),
-                                 UPPER(BAIRROCOB),
-                                 UPPER(UFCOB),
-                                 CEPCOB,
-                                 UPPER(TIPOLOGRADOUROENT),
-                                 UPPER(LOGRADOUROENT),
-                                 UPPER(NROENT),
-                                 UPPER(PONTOREFERENCIAENT),
-                                 UPPER(MUNICIPIOENT),
-                                 UPPER(BAIRROENT),
-                                 UPPER(UFENT),
-                                 CEPENT,
-                                 UPPER(NOMECONTATO),
-                                 UPPER(CARGO),
-                                 UPPER(EMAIL),
-                                 DDD_TEL,
-                                 TEL,
-                                 DDD_CEL,
-                                 CAST(CELULAR as DECIMAL(12,0)),
-                                 UPPER(RAZAO),
-                                 UPPER(NOMEFANTASIA),
-                                 CAST(CGCNOVO AS BIGINT),
-                                 RG,
-                                 situacao,
-                                 CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
-                                 CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
-                                 ORIGEM,
-                                 CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
-                                 'PRT',
-                                 TABELAPRECO,
-                                 condicaoPagamentoCliente,
-                                 tipoClienteCobranca);
-        ELSE 
-           INSERT INTO VDCLIPCL (VDCLIPCL_NREMP,
-                                 VDCLIPCL_TIPO_LOGRADOURO_FAT,
-                                 VDCLIPCL_LOGRADOURO_FAT,
-                                 VDCLIPCL_NUMERO_FAT,
-                                 VDCLIPCL_PONTO_REFERENCIA_FAT,
-                                 VDCLIPCL_MUNICIPIO_FAT,
-                                 VDCLIPCL_BAIRRO_FAT,
-                                 VDCLIPCL_UF_FAT,
-                                 VDCLIPCL_CEP_FAT,
-                                 VDCLIPCL_TIPO_LOGRADOURO_COB,
-                                 VDCLIPCL_LOGRADOURO_COB,
-                                 VDCLIPCL_NUMERO_COB,
-                                 VDCLIPCL_PONTO_REFERENCIA_COB,
-                                 VDCLIPCL_MUNICIPIO_COB,
-                                 VDCLIPCL_BAIRRO_COB,
-                                 VDCLIPCL_UF_COB,
-                                 VDCLIPCL_CEP_COB,
-                                 VDCLIPCL_TIPO_LOGRADOURO_ENT,
-                                 VDCLIPCL_LOGRADOURO_ENT,
-                                 VDCLIPCL_NUMERO_ENT,
-                                 VDCLIPCL_PONTO_REFERENCIA_ENT,
-                                 VDCLIPCL_MUNICIPIO_ENT,
-                                 VDCLIPCL_BAIRRO_ENT,
-                                 VDCLIPCL_UF_ENT,
-                                 VDCLIPCL_CEP_ENT,
-                                 VDCLIPCL_NOME_CONTATO,
-                                 VDCLIPCL_CARGO,
-                                 VDCLIPCL_EMAIL,
-                                 VDCLIPCL_DDD_TEL,
-                                 VDCLIPCL_TELEFONE,
-                                 VDCLIPCL_DDD_CEL,
-                                 VDCLIPCL_CELULAR,
-                                 VDCLIPCL_RAZAO,
-                                 VDCLIPCL_NOME_FANTASIA,
-                                 VDCLIPCL_CNPJ_CPF,
-                                 VDCLIPCL_RG,
-                                 VDCLIPCL_SITUACAO,
-                                 VDCLIPCL_DATA_PROC,
-                                 VDCLIPCL_HORA_PROC,
-                                 VDCLIPCL_INCLDT,
-                                 VDCLIPCL_INCLUSER,
-                                 VDCLIPCL_TBPRD,
-                                 VDCLIPCL_ORIGEM,
-                                 VDCLIPCL_CLASSE,
-                                 VDCLIPCL_CAT,
-                                 VDCLIPCL_MOTBLO,
-                                 VDCLIPCL_INEST,
-                                 VDCLIPCL_CPG,
-                                 VDCLIPCL_TPCOBRA,
-                                 VDCLIPCL_SUBCANAL,
-                                 VDCLIPCL_GPS_X,
-                                 VDCLIPCL_GPS_Y,
-                                 VDCLIPCL_VEN,
-                                 VDCLIPCL_CODPASTA,
-                                 VDCLIPCL_SEQPASTA,
-                                 VDCLIPCL_REGIAOINCLUSAO,
-                                 VDCLIPCL_ALTERADO)
-                         VALUES (NUMEROEMP,
-                                 UPPER(TIPOLOGRADOUROFAT),
-                                 UPPER(LOGRADOUROFAT),
-                                 UPPER(NROFAT),
-                                 UPPER(PONTOREFERENCIAFAT),
-                                 UPPER(MUNICIPIOFAT),
-                                 UPPER(BAIRROFAT),
-                                 UPPER(UFFAT),
-                                 CEPFAT,
-                                 UPPER(TIPOLOGRADOUROCOB),
-                                 UPPER(LOGRADOUROCOB),
-                                 UPPER(NROCOB),
-                                 UPPER(PONTOREFERENCIACOB),
-                                 UPPER(MUNICIPIOCOB),
-                                 UPPER(BAIRROCOB),
-                                 UPPER(UFCOB),
-                                 CEPCOB,
-                                 UPPER(TIPOLOGRADOUROENT),
-                                 UPPER(LOGRADOUROENT),
-                                 UPPER(NROENT),
-                                 UPPER(PONTOREFERENCIAENT),
-                                 UPPER(MUNICIPIOENT),
-                                 UPPER(BAIRROENT),
-                                 UPPER(UFENT),
-                                 CEPENT,
-                                 UPPER(NOMECONTATO),
-                                 UPPER(CARGO),
-                                 UPPER(EMAIL),
-                                 DDD_TEL,
-                                 TEL,
-                                 DDD_CEL,
-                                 CELULAR,
-                                 UPPER(RAZAO),
-                                 UPPER(NOMEFANTASIA),
-                                 CAST(CGCNOVO AS BIGINT),
-                                 RG,
-                                 situacao,
-                                 CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
-                                 CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
-                                 CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
-                                 'PRT',
-                                 TABELAPRECO,
-                                 UPPER(ORIGEM),
-                                 CLASSE,
-                                 codigoCanal,
-                                 MotivoBloqClasse01,
-                                 inscricaoEstadual,
-                                 condicaoPagamentoCliente,
-                                 tipoClienteCobranca,
-                                 subCanal,
-                                 gpsLatitude,
-                                 gpsLongitude,
-                                 VENDEDOR,
-                                 pasta,
-                                 seqVisita,
-                                 regiaoInclusao,
-                                 alterou);
-        END IF;   
-        
-        SET clienteNovo = SELECT VDCLIPCL_CNPJ_CPF FROM VDCLIPCL WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP =  NUMEROEMP;
-        
-        IF clienteNovo <> NULL THEN
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE INSERIDO COM SUCESSO';
-        ELSE
-          SET STATUSMSG = 0;
-          SET MSG = 'ERRO AO INSER CLIENTE';
-        END IF;
-     END IF;  
+ IF preClienteExiste = NULL THEN
+ IF TIPOLOGRADOUROFAT = NULL OR
+ LOGRADOUROFAT = NULL OR
+   NROFAT = NULL OR
+   PONTOREFERENCIAFAT = NULL OR
+   BAIRROFAT = NULL OR
+   MUNICIPIOFAT = NULL OR
+   UFFAT = NULL OR
+   CEPFAT = NULL OR
+   CGCNOVO = NULL OR
+   TABELAPRECO = NULL OR
+   NUMEROEMP = NULL OR
+  ORIGEM = NULL THEN
+
+    SET STATUSMSG = 0;
+   SET MSG = 'OS CAMPOS NUMEROEMP, ORIGEM, CGCNOVO,TIPOLOGRADOUROFAT, LOGRADOUROFAT, NROFAT, PONTOREFERENCIAFAT, BAIRROFAT, MUNICIPIOFAT, UFFAT, CEPFAT E TABELAPRECO SAO OBRIGATORIO';
+ ELSE
+  IF UPPER(ORIGEM) = 'L' THEN
+    INSERT INTO VDCLIPCL (VDCLIPCL_NREMP,
+ VDCLIPCL_TIPO_LOGRADOURO_FAT,
+ VDCLIPCL_LOGRADOURO_FAT,
+ VDCLIPCL_NUMERO_FAT,
+ VDCLIPCL_PONTO_REFERENCIA_FAT,
+ VDCLIPCL_MUNICIPIO_FAT,
+ VDCLIPCL_BAIRRO_FAT,
+ VDCLIPCL_UF_FAT,
+ VDCLIPCL_CEP_FAT,
+ VDCLIPCL_TIPO_LOGRADOURO_COB,
+ VDCLIPCL_LOGRADOURO_COB,
+ VDCLIPCL_NUMERO_COB,
+ VDCLIPCL_PONTO_REFERENCIA_COB,
+ VDCLIPCL_MUNICIPIO_COB,
+ VDCLIPCL_BAIRRO_COB,
+ VDCLIPCL_UF_COB,
+ VDCLIPCL_CEP_COB,
+ VDCLIPCL_TIPO_LOGRADOURO_ENT,
+ VDCLIPCL_LOGRADOURO_ENT,
+ VDCLIPCL_NUMERO_ENT,
+ VDCLIPCL_PONTO_REFERENCIA_ENT,
+ VDCLIPCL_MUNICIPIO_ENT,
+ VDCLIPCL_BAIRRO_ENT,
+ VDCLIPCL_UF_ENT,
+ VDCLIPCL_CEP_ENT,
+ VDCLIPCL_NOME_CONTATO,
+ VDCLIPCL_CARGO,
+ VDCLIPCL_EMAIL,
+ VDCLIPCL_DDD_TEL,
+ VDCLIPCL_TELEFONE,
+ VDCLIPCL_DDD_CEL,
+ VDCLIPCL_CELULAR,
+ VDCLIPCL_RAZAO,
+ VDCLIPCL_NOME_FANTASIA,
+ VDCLIPCL_CNPJ_CPF,
+ VDCLIPCL_RG,
+ VDCLIPCL_SITUACAO,
+ VDCLIPCL_DATA_PROC,
+ VDCLIPCL_HORA_PROC,
+ VDCLIPCL_ORIGEM,
+ VDCLIPCL_INCLDT,
+ VDCLIPCL_INCLUSER,
+ VDCLIPCL_TBPRD,
+ VDCLIPCL_CPG,
+ VDCLIPCL_TPCOBRA)
+ VALUES (NUMEROEMP,
+     UPPER(TIPOLOGRADOUROFAT),
+ UPPER(LOGRADOUROFAT),
+ UPPER(NROFAT),
+ UPPER(PONTOREFERENCIAFAT),
+ UPPER(MUNICIPIOFAT),
+ UPPER(BAIRROFAT),
+ UPPER(UFFAT),
+ CEPFAT,
+ UPPER(TIPOLOGRADOUROCOB),
+ UPPER(LOGRADOUROCOB),
+ UPPER(NROCOB),
+ UPPER(PONTOREFERENCIACOB),
+ UPPER(MUNICIPIOCOB),
+ UPPER(BAIRROCOB),
+ UPPER(UFCOB),
+ CEPCOB,
+ UPPER(TIPOLOGRADOUROENT),
+ UPPER(LOGRADOUROENT),
+ UPPER(NROENT),
+ UPPER(PONTOREFERENCIAENT),
+ UPPER(MUNICIPIOENT),
+ UPPER(BAIRROENT),
+ UPPER(UFENT),
+ CEPENT,
+ UPPER(NOMECONTATO),
+ UPPER(CARGO),
+ UPPER(EMAIL),
+ DDD_TEL,
+ TEL,
+ DDD_CEL,
+ CAST(CELULAR as DECIMAL(12,0)),
+ UPPER(RAZAO),
+ UPPER(NOMEFANTASIA),
+ CAST(CGCNOVO AS BIGINT),
+ RG,
+ situacao,
+ CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
+ CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+ ORIGEM,
+ CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
+ 'PRT',
+ TABELAPRECO,
+ condicaoPagamentoCliente,
+ tipoClienteCobranca);
   ELSE
-     IF CGCNOVO = NULL OR NUMEROEMP = NULL THEN
-        SET STATUSMSG = 0;
-        SET MSG = 'NUMERO EMPRESA E CNPJ OU CPF NAO PODEM SER NULOS';
-     ELSE
-        IF TIPOLOGRADOUROFAT <> NULL THEN
-           UPDATE VDCLIPCL SET VDCLIPCL_TIPO_LOGRADOURO_FAT = UPPER(TIPOLOGRADOUROFAT),
-                               VDCLIPCL_SITUACAO  =   situacao,
-                               VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                               VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
-                               VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                               VDCLIPCL_ALTEUSER = 'PRT'
-                         WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;    
-        IF LOGRADOUROFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_LOGRADOURO_FAT  = UPPER(LOGRADOUROFAT), 
-                  VDCLIPCL_SITUACAO  =   situacao  ,
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF NROFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_NUMERO_FAT  = UPPER(NROFAT), 
-                  VDCLIPCL_SITUACAO  =   situacao  ,
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF PONTOREFERENCIAFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_PONTO_REFERENCIA_FAT  = UPPER(PONTOREFERENCIAFAT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF MUNICIPIOFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_MUNICIPIO_FAT  = UPPER(MUNICIPIOFAT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF BAIRROFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_BAIRRO_FAT  = UPPER(BAIRROFAT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;     
-        IF UFFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_UF_FAT  = UPPER(UFFAT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF CEPFAT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_CEP_FAT  = CEPFAT,
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF NOMECONTATO <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_NOME_CONTATO  = UPPER(NOMECONTATO), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;    
-        IF CARGO <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_CARGO  = UPPER(CARGO), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;    
-        IF EMAIL <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_EMAIL  = UPPER(EMAIL), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;  
-        IF DDD_TEL <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_DDD_TEL  = DDD_TEL, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;      
-        IF TEL <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_TELEFONE  = TEL, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;  
-        IF DDD_CEL <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_DDD_CEL  = DDD_CEL, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF CELULAR <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_CELULAR  = CELULAR, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;    
-        IF RAZAO <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_RAZAO  = UPPER(RAZAO), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF NOMEFANTASIA <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_NOME_FANTASIA  = UPPER(NOMEFANTASIA), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),  
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF TIPOLOGRADOUROCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_TIPO_LOGRADOURO_COB  = UPPER(TIPOLOGRADOUROCOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF LOGRADOUROCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_LOGRADOURO_COB  = UPPER(LOGRADOUROCOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF NROCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_NUMERO_COB  = UPPER(NROCOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF PONTOREFERENCIACOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_PONTO_REFERENCIA_COB  = UPPER(PONTOREFERENCIACOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF MUNICIPIOCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_MUNICIPIO_COB  = UPPER(MUNICIPIOCOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF BAIRROCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_BAIRRO_COB  = UPPER(BAIRROCOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;     
-        IF UFCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_UF_COB  = UPPER(UFCOB), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF CEPCOB <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_CEP_COB  = CEPCOB, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF; 
-        IF TIPOLOGRADOUROENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_TIPO_LOGRADOURO_ENT  = UPPER(TIPOLOGRADOUROENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF LOGRADOUROENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_LOGRADOURO_ENT  = UPPER(LOGRADOUROENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF NROENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_NUMERO_ENT  = UPPER(NROENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF PONTOREFERENCIAENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_PONTO_REFERENCIA_ENT  = UPPER(PONTOREFERENCIAENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF MUNICIPIOENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_MUNICIPIO_ENT  = UPPER(MUNICIPIOENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF BAIRROENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_BAIRRO_ENT  = UPPER(BAIRROENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;     
-        IF UFENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_UF_ENT  = UPPER(UFENT), 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-        IF CEPENT <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_CEP_ENT  = CEPENT, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;    
-        IF TABELAPRECO <> NULL THEN
-           UPDATE VDCLIPCL SET             
-                  VDCLIPCL_TBPRD  = TABELAPRECO, 
-                  VDCLIPCL_SITUACAO = situacao  ,  
-                  VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),  
-                  VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
-                  VDCLIPCL_ALTEUSER = 'PRT'
-           WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
-           SET STATUSMSG = 1;
-           SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
-        END IF;
-     END IF;   
+ INSERT INTO VDCLIPCL (VDCLIPCL_NREMP,
+ VDCLIPCL_TIPO_LOGRADOURO_FAT,
+ VDCLIPCL_LOGRADOURO_FAT,
+ VDCLIPCL_NUMERO_FAT,
+ VDCLIPCL_PONTO_REFERENCIA_FAT,
+ VDCLIPCL_MUNICIPIO_FAT,
+ VDCLIPCL_BAIRRO_FAT,
+ VDCLIPCL_UF_FAT,
+ VDCLIPCL_CEP_FAT,
+ VDCLIPCL_TIPO_LOGRADOURO_COB,
+ VDCLIPCL_LOGRADOURO_COB,
+ VDCLIPCL_NUMERO_COB,
+ VDCLIPCL_PONTO_REFERENCIA_COB,
+ VDCLIPCL_MUNICIPIO_COB,
+ VDCLIPCL_BAIRRO_COB,
+ VDCLIPCL_UF_COB,
+ VDCLIPCL_CEP_COB,
+ VDCLIPCL_TIPO_LOGRADOURO_ENT,
+ VDCLIPCL_LOGRADOURO_ENT,
+ VDCLIPCL_NUMERO_ENT,
+ VDCLIPCL_PONTO_REFERENCIA_ENT,
+ VDCLIPCL_MUNICIPIO_ENT,
+ VDCLIPCL_BAIRRO_ENT,
+ VDCLIPCL_UF_ENT,
+ VDCLIPCL_CEP_ENT,
+ VDCLIPCL_NOME_CONTATO,
+ VDCLIPCL_CARGO,
+ VDCLIPCL_EMAIL,
+ VDCLIPCL_DDD_TEL,
+ VDCLIPCL_TELEFONE,
+ VDCLIPCL_DDD_CEL,
+ VDCLIPCL_CELULAR,
+ VDCLIPCL_RAZAO,
+ VDCLIPCL_NOME_FANTASIA,
+ VDCLIPCL_CNPJ_CPF,
+ VDCLIPCL_RG,
+ VDCLIPCL_SITUACAO,
+ VDCLIPCL_DATA_PROC,
+ VDCLIPCL_HORA_PROC,
+ VDCLIPCL_INCLDT,
+ VDCLIPCL_INCLUSER,
+ VDCLIPCL_TBPRD,
+ VDCLIPCL_ORIGEM,
+ VDCLIPCL_CLASSE,
+ VDCLIPCL_CAT,
+ VDCLIPCL_MOTBLO,
+ VDCLIPCL_INEST,
+ VDCLIPCL_CPG,
+ VDCLIPCL_TPCOBRA,
+ VDCLIPCL_SUBCANAL,
+ VDCLIPCL_GPS_X,
+ VDCLIPCL_GPS_Y,
+ VDCLIPCL_VEN,
+ VDCLIPCL_CODPASTA,
+ VDCLIPCL_SEQPASTA,
+ VDCLIPCL_REGIAOINCLUSAO,
+ VDCLIPCL_ALTERADO)
+ VALUES (NUMEROEMP,
+ UPPER(TIPOLOGRADOUROFAT),
+ UPPER(LOGRADOUROFAT),
+ UPPER(NROFAT),
+ UPPER(PONTOREFERENCIAFAT),
+ UPPER(MUNICIPIOFAT),
+ UPPER(BAIRROFAT),
+ UPPER(UFFAT),
+ CEPFAT,
+ UPPER(TIPOLOGRADOUROCOB),
+ UPPER(LOGRADOUROCOB),
+ UPPER(NROCOB),
+ UPPER(PONTOREFERENCIACOB),
+ UPPER(MUNICIPIOCOB),
+ UPPER(BAIRROCOB),
+ UPPER(UFCOB),
+ CEPCOB,
+ UPPER(TIPOLOGRADOUROENT),
+ UPPER(LOGRADOUROENT),
+ UPPER(NROENT),
+ UPPER(PONTOREFERENCIAENT),
+ UPPER(MUNICIPIOENT),
+ UPPER(BAIRROENT),
+ UPPER(UFENT),
+ CEPENT,
+ UPPER(NOMECONTATO),
+ UPPER(CARGO),
+ UPPER(EMAIL),
+ DDD_TEL,
+ TEL,
+ DDD_CEL,
+ CELULAR,
+ UPPER(RAZAO),
+ UPPER(NOMEFANTASIA),
+ CAST(CGCNOVO AS BIGINT),
+ RG,
+ situacao,
+ CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
+ CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+ CAST(REPLACE(CAST(CURDATE() AS VARCHAR(10)),'-','') AS INT),
+ 'PRT',
+ TABELAPRECO,
+ UPPER(ORIGEM),
+ CLASSE,
+ codigoCanal,
+ MotivoBloqClasse01,
+ inscricaoEstadual,
+ condicaoPagamentoCliente,
+ tipoClienteCobranca,
+ subCanal,
+ gpsLatitude,
+ gpsLongitude,
+ VENDEDOR,
+ pasta,
+ seqVisita,
+ regiaoInclusao,
+ alterou);
+    END IF;
+  
+ SET clienteNovo = SELECT VDCLIPCL_CNPJ_CPF FROM VDCLIPCL WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+  
+ IF clienteNovo <> NULL THEN
+    SET STATUSMSG = 1;
+    SET MSG = 'CLIENTE INSERIDO COM SUCESSO';
+  ELSE
+ SET STATUSMSG = 0;
+  SET MSG = 'ERRO AO INSER CLIENTE';
   END IF;
-END; 
+ END IF;
+ ELSE
+  IF CGCNOVO = NULL OR NUMEROEMP = NULL THEN
+  SET STATUSMSG = 0;
+  SET MSG = 'NUMERO EMPRESA E CNPJ OU CPF NAO PODEM SER NULOS';
+ ELSE
+  IF TIPOLOGRADOUROFAT <> NULL THEN
+   UPDATE VDCLIPCL SET VDCLIPCL_TIPO_LOGRADOURO_FAT = UPPER(TIPOLOGRADOUROFAT),
+ VDCLIPCL_SITUACAO = situacao,
+ VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+ VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+ VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+ VDCLIPCL_ALTEUSER = 'PRT'
+    WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+  END IF;
+ IF LOGRADOUROFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_LOGRADOURO_FAT = UPPER(LOGRADOUROFAT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF NROFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_NUMERO_FAT = UPPER(NROFAT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF PONTOREFERENCIAFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_PONTO_REFERENCIA_FAT = UPPER(PONTOREFERENCIAFAT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF MUNICIPIOFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_MUNICIPIO_FAT = UPPER(MUNICIPIOFAT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF BAIRROFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_BAIRRO_FAT = UPPER(BAIRROFAT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF UFFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_UF_FAT = UPPER(UFFAT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF CEPFAT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_CEP_FAT = CEPFAT,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF NOMECONTATO <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_NOME_CONTATO = UPPER(NOMECONTATO),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF CARGO <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_CARGO = UPPER(CARGO),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF EMAIL <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_EMAIL = UPPER(EMAIL),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF DDD_TEL <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_DDD_TEL = DDD_TEL,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF TEL <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_TELEFONE = TEL,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF DDD_CEL <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_DDD_CEL = DDD_CEL,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF CELULAR <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_CELULAR = CELULAR,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF RAZAO <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_RAZAO = UPPER(RAZAO),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF NOMEFANTASIA <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_NOME_FANTASIA = UPPER(NOMEFANTASIA),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF TIPOLOGRADOUROCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_TIPO_LOGRADOURO_COB = UPPER(TIPOLOGRADOUROCOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF LOGRADOUROCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_LOGRADOURO_COB = UPPER(LOGRADOUROCOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF NROCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_NUMERO_COB = UPPER(NROCOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF PONTOREFERENCIACOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_PONTO_REFERENCIA_COB = UPPER(PONTOREFERENCIACOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF MUNICIPIOCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_MUNICIPIO_COB = UPPER(MUNICIPIOCOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF BAIRROCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_BAIRRO_COB = UPPER(BAIRROCOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF UFCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_UF_COB = UPPER(UFCOB),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF CEPCOB <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_CEP_COB = CEPCOB,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF TIPOLOGRADOUROENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_TIPO_LOGRADOURO_ENT = UPPER(TIPOLOGRADOUROENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF LOGRADOUROENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_LOGRADOURO_ENT = UPPER(LOGRADOUROENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF NROENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_NUMERO_ENT = UPPER(NROENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF PONTOREFERENCIAENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_PONTO_REFERENCIA_ENT = UPPER(PONTOREFERENCIAENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF MUNICIPIOENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_MUNICIPIO_ENT = UPPER(MUNICIPIOENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+   IF BAIRROENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_BAIRRO_ENT = UPPER(BAIRROENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF UFENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_UF_ENT = UPPER(UFENT),
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF CEPENT <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_CEP_ENT = CEPENT,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+ IF TABELAPRECO <> NULL THEN
+   UPDATE VDCLIPCL SET
+      VDCLIPCL_TBPRD = TABELAPRECO,
+VDCLIPCL_SITUACAO = situacao ,
+VDCLIPCL_DATA_PROC = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_HORA_PROC = CAST(LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(10)),':','') ,4 )AS INT),
+VDCLIPCL_ALTEDT = CAST(REPLACE(CAST(CURDATE() AS CHAR(10)),'-','') AS INT),
+VDCLIPCL_ALTEUSER = 'PRT'
+   WHERE VDCLIPCL_CNPJ_CPF = CAST(CGCNOVO AS BIGINT) and VDCLIPCL_NREMP = NUMEROEMP;
+ SET STATUSMSG = 1;
+   SET MSG = 'CLIENTE ATUALIZADO COM SUCESSO';
+ END IF;
+END IF;
+END IF;
+
+END; 
