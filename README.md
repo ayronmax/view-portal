@@ -1,2 +1,2 @@
 # view-portal
-Views e procedurs do Portal de Vendas
+Views e procedures do Portal de Vendas.
