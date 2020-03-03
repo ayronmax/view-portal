@@ -1,4 +1,5 @@
 create function datetostr.DATETOSTR(DATE, varchar(20)) RETURNS varchar(20);
+create function to_date.TO_DATE(varchar(20), varchar(20)) RETURNS DATE
 
 CREATE OR REPLACE VIEW VW_DADOS_CLIENTE AS 
 SELECT 
@@ -302,18 +303,8 @@ CREATE OR replace VIEW  vw_cliente AS SELECT 0 AS abate_icms,
        VW_DADOS_CLIENTE. "vdclicli_restr_comerciais"                          AS restircao_comercial, 
        VW_DADOS_CLIENTE. "vdclicli_sigla"                                     AS sigla, 
        VW_DADOS_CLIENTE. "vdclicli_subcanal"                                  AS sub_canal, 
-       CASE 
-              WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12)), 1, 2)
-              ELSE '0' 
-       END AS telefone_ddd, 
-       CASE 
-              WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR ( 12))
-              ELSE 
-                     CASE 
-                            WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS   CHAR(12 ))) = 1 THEN '0'
-                            ELSE Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 3, 11 )
-                     END 
-       END                                  AS telefone_tronco, 
+       CASE WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR(12)), 1, 3) ELSE '0' END AS telefone_ddd,
+       CASE WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( cadcli01. "vdclicli_fone" AS CHAR ( 12)) WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR( 12)), 4, 12 ) ELSE CASE WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR(12 ))) = 1 THEN '0' ELSE Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR( 12)), 3, 11 ) END END AS telefone_tronco, 
        VW_DADOS_CLIENTE. "vdclicli_verba_fin_pro"   AS uso_verba_restrito_produto, 
        VW_DADOS_CLIENTE. "vdclicli_cat"             AS codigo_canal_erp, 
        VW_DADOS_CLIENTE. "vdclicli_cpg"             AS codigo_condicao_pagamento_erp, 
@@ -334,7 +325,7 @@ DECLARE SET INT @codigo_cev = 0;
 
 CREATE or replace VIEW VW_COMODATO AS
 SELECT
-  REPEAT('0', 8 - length(Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)))) || Cast(cevped01."vdcevpen_codcli" AS VARCHAR(6)) CODIGO_CLIENTE_ERP,
+  REPEAT('0',8-length(Cast(cevped01."vdcevpen_codcli" AS VARCHAR(8)))) || Cast(cevped01."vdcevpen_codcli" AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_MODELO,
   NULL CODIGO_OCORRENCIA,
   NULL CODIGO_SITUACAO,
@@ -375,23 +366,27 @@ WHERE
  (vdcevpen_nrccev = @codigo_cev OR @codigo_cev = 0);
 
 DECLARE SET INT @CODIGO_CONDICAO_PAGAMENTO = 0;
+
 CREATE
-or replace VIEW  VW_CONDICAO_PAGAMENTO AS
+or replace VIEW VW_CONDICAO_PAGAMENTO AS
 SELECT
     condpg01."vdcadpag_ativo" AS ATIVO,
-    condpg01."vdcadpag_cod" AS CODIGO_CONDICAO_PAGAMENTO_ERP,
+    CASE
+              WHEN Length(Cast(VDCADPAG_COD AS VARCHAR(2))) = 1 THEN Concat('0',Cast(VDCADPAG_COD AS VARCHAR(2)))
+    ELSE
+              Cast(VDCADPAG_COD AS VARCHAR(2)) END AS CODIGO_CONDICAO_PAGAMENTO_ERP,
     condpg01."vdcadpag_descr" AS DESCRICAO,
     CASE WHEN condpg01."vdcadpag_cod" = 1 THEN 1 ELSE 0 END AS INFORMA_PRIMEIRA_PARCELA,
     condpg01."vdcadpag_nrdias" AS NUMERO_DIAS,
     condpg01."vdcadpag_prazo" AS PRAZO,
-	VDCADPAG_SFA_DISP as disponivel
+VDCADPAG_SFA_DISP as disponivel
 FROM
      CONDPG01
 WHERE
     (
         condpg01."vdcadpag_cod" = @CODIGO_CONDICAO_PAGAMENTO
         OR @CODIGO_CONDICAO_PAGAMENTO = 0
-    );
+    ); 
 
 declare set int @pasta = 0;
 
@@ -800,11 +795,11 @@ SELECT
   REPEAT('0',8-length(Cast(crchqdep_codcli AS VARCHAR(8)))) || Cast(crchqdep_codcli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO_ERP,
   CASE WHEN crchqdep_dtv >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) THEN
-         crchqdep_dte
+         TO_DATE(SUBSTRING(cast(crchqdep_dte as varchar(8)),7,2) || SUBSTRING(cast(crchqdep_dte as varchar(8)),5,2) || SUBSTRING(cast(crchqdep_dte as varchar(8)),1,4), 'DDMMYYYY')
        ELSE
-         crchqdep_dtv
+         TO_DATE(SUBSTRING(cast(crchqdep_dtv as varchar(8)),7,2) || SUBSTRING(cast(crchqdep_dtv as varchar(8)),5,2) || SUBSTRING(cast(crchqdep_dtv as varchar(8)),1,4), 'DDMMYYYY')
   END DATA_OPERACAO,
-  crchqdep_dtv DATA_VENCIMENTO,
+  TO_DATE(SUBSTRING(cast(crchqdep_dtv as varchar(8)),7,2) || SUBSTRING(cast(crchqdep_dtv as varchar(8)),5,2) || SUBSTRING(cast(crchqdep_dtv as varchar(8)),1,4), 'DDMMYYYY') DATA_VENCIMENTO,
   CASE WHEN crchqdep_dte = crchqdep_dtv THEN
          1
        ELSE
@@ -828,11 +823,11 @@ SELECT
   REPEAT('0',8-length(Cast(crchqdvv_ccli AS VARCHAR(8)))) || Cast(crchqdvv_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO,
   CASE WHEN crchqdvv_dtqui > 0 THEN
-         crchqdvv_dtqui
+         TO_DATE(SUBSTRING(cast(crchqdvv_dtqui as varchar(8)),7,2) || SUBSTRING(cast(crchqdvv_dtqui as varchar(8)),5,2) || SUBSTRING(cast(crchqdvv_dtqui as varchar(8)),1,4), 'DDMMYYYY')
        ELSE
-         0
+         NULL
   END DATA_OPERACAO,
-  crchqdvv_dtvto DATA_VENCIMENTO,
+  TO_DATE(SUBSTRING(cast(crchqdvv_dtvto as varchar(8)),7,2) || SUBSTRING(cast(crchqdvv_dtvto as varchar(8)),5,2) || SUBSTRING(cast(crchqdvv_dtvto as varchar(8)),1,4), 'DDMMYYYY') DATA_VENCIMENTO,
   0 MOD,
   CAST(crchqdvv_nchq AS VARCHAR(255)) NUMERO_DOCUMENTO,
   '3' TIPO_REGISTRO,
@@ -842,13 +837,14 @@ FROM
   CHDVV01
 WHERE
   crchqdvv_dtqui = 0 AND
-  (crchqdvv_dtqui = @DATA_OPERACAO OR @DATA_OPERACAO = 0)
+  crchqdvv_dtemi >= CAST(DATETOSTR(Curdate()-45,'yyyymmdd') AS INT) AND
+  (crchqdvv_dtqui = @DATA_OPERACAO OR @DATA_OPERACAO = 0) 
 UNION ALL
 SELECT
   REPEAT('0',8-length(Cast(crmovbai_ccli AS VARCHAR (8)))) || Cast(crmovbai_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO,
-  crmovbai_dtp DATA_OPERACAO,
-  crmovbai_dtv DATA_VENCIMENTO,
+  TO_DATE(SUBSTRING(cast(crmovbai_dtp as varchar(8)),7,2) || SUBSTRING(cast(crmovbai_dtp as varchar(8)),5,2) || SUBSTRING(cast(crmovbai_dtp as varchar(8)),1,4), 'DDMMYYYY') DATA_OPERACAO,
+  TO_DATE(SUBSTRING(cast(crmovbai_dtv as varchar(8)),7,2) || SUBSTRING(cast(crmovbai_dtv as varchar(8)),5,2) || SUBSTRING(cast(crmovbai_dtv as varchar(8)),1,4), 'DDMMYYYY') DATA_VENCIMENTO,
   crmovbai_mod MOD,
   crmovbai_ndupl NUMERO_DOCUMENTO,
   '2' TIPO_REGISTRO,
@@ -863,8 +859,8 @@ UNION ALL
 SELECT
   REPEAT('0',8-length(Cast(crmovmov_ccli AS VARCHAR(8)))) || Cast(crmovmov_ccli AS VARCHAR(8)) CODIGO_CLIENTE_ERP,
   NULL CODIGO_PRODUTO,
-  crmovmov_dte DATA_OPERACAO,
-  crmovmov_dtv DATA_VENCIMENTO,
+  TO_DATE(SUBSTRING(cast(crmovmov_dte as varchar(8)),7,2) || SUBSTRING(cast(crmovmov_dte as varchar(8)),5,2) || SUBSTRING(cast(crmovmov_dte as varchar(8)),1,4), 'DDMMYYYY') DATA_OPERACAO,  
+  TO_DATE(SUBSTRING(cast(crmovmov_dtv as varchar(8)),7,2) || SUBSTRING(cast(crmovmov_dtv as varchar(8)),5,2) || SUBSTRING(cast(crmovmov_dtv as varchar(8)),1,4), 'DDMMYYYY') DATA_VENCIMENTO,
   crmovmov_mod MOD,
   crmovmov_ndupl NUMERO_DOCUMENTO,
   '1' TIPO_REGISTRO,
@@ -880,7 +876,7 @@ ORDER BY
 DECLARE SET VARCHAR(255) @CODIGO_OCORRENCIA ='';
 
 CREATE
-or replace VIEW  VW_OCORRENCIA AS
+or replace VIEW VW_OCORRENCIA AS
 SELECT
     CASE WHEN cadoco01."vdnopoco_cancsn" = 0 THEN 1 ELSE 0 END AS ATIVO,
     cadoco01."vdnopoco_cod" AS CODIGO_OCORRENCIA_ERP,
@@ -889,7 +885,7 @@ SELECT
     cadoco01."vdnopoco_desdobro" AS DESDOBRO,
     NULL AS EMPRESA,
     CASE WHEN cadoco01."vdnopoco_totven" = 'S' THEN 1 ELSE 0 END AS GERA_MOTIVO_FINANC,
-    1 AS OCORR_DISP_PORTAL,
+    VDNOPOCO_DISP_PORTAL_WEB AS OCORR_DISP_PORTAL,
     cadoco01."vdnopoco_sinal" AS SINAL,
     cadoco01."vdnopoco_tipo" AS TIPO,
     cadoco01."vdnopoco_tpprd" AS TIPO_PRODUTO,
@@ -906,7 +902,7 @@ WHERE
     AND (
         cadoco01."vdnopoco_cod" = @CODIGO_OCORRENCIA
         OR @CODIGO_OCORRENCIA = ''
-    );
+);
 
 DECLARE SET SMALLINT @CODIGO_EMPRESA = 0;
 
@@ -1061,72 +1057,48 @@ INNER JOIN
 DECLARE SET BIGINT @COD_PRODUTO = 0;
 DECLARE SET BIGINT @COD_TABELA = 0;
 
-
-CREATE
-or replace VIEW  VW_PRECO_PRODUTO AS
+CREATE or replace VIEW VW_PRECO_PRODUTO AS 
 SELECT
-    tabprc01."vdtabprd_aliqpvv" AS aliq_pvv,
-	1 AS ATIVO,
-    Cast(
-        Cast(
-            Cast(tabprc01."vdtabprd_ano" AS CHAR(04)) || CASE WHEN tabprc01."vdtabprd_mes" <= 9 THEN Concat(
-                '0',
-                Cast(tabprc01."vdtabprd_mes" AS CHAR (1))
-            ) ELSE Cast(tabprc01."vdtabprd_mes" AS CHAR (2)) END || CASE WHEN tabprc01."vdtabprd_nmes" <= 9 THEN Concat(
-                '0',
-                Cast(tabprc01."vdtabprd_nmes" AS CHAR(1))
-            ) ELSE Cast(tabprc01."vdtabprd_nmes" AS CHAR(2)) END AS CHAR(08)
-        ) AS BIGINT
-    ) AS codigo_tabpreco_erp,
-    tabprc01."vdtabprd_daicmo" AS da_icm_o,
-    tabprc01."vdtabprd_desc" AS desconto,
-    tabprc01."vdtabprd_descmax" AS desconto_maximo,
-    tabprc01."vdtabprd_descvb" AS desconto_verba,
-    tabprc01."vdtabprd_despac" AS despac,
-    tabprc01."vdtabprd_tipotab" AS origem_tabela,
-    tabprc01."vdtabprd_participabda" AS participa_banda_preco,
-    NULL AS preco_custo_caixa,
-    NULL AS preco_custo_un,
-    tabprc01."vdtabprd_precopvv" AS preco_pvv,
-    NULL AS promocao,
-    tabprc01."vdtabprd_restr_comerciais" AS restricao,
-    tabprc01."vdtabprd_selo" AS selo,
-    tabprc01."vdtabprd_tpcont" AS tp_cont,
-    NULL AS uf_table_preco,
-    tabprc01."vdtabprd_valicm" AS val_icms,
-    tabprc01."vdtabprd_valipi" AS val_ipi,
-    tabprc01."vdtabprd_preco" AS valor,
-    cadprd01."vdprdprd_codr" AS codigo_produto_erp,
-    tabprc01."vdtabprd_dtvgf" AS fim
+  vdtabprd_aliqpvv aliq_pvv,
+  1 AS ATIVO,
+  cast(cast(vdtabprd_ano as varchar(4)) || 
+  repeat('0',2-length(cast(vdtabprd_mes as varchar(2)))) || cast(vdtabprd_mes as varchar(2)) || 
+  repeat('0',2-length(cast(vdtabprd_nmes as varchar(2)))) || cast(vdtabprd_nmes as varchar(2)) as bigint) codigo_tabpreco_erp,
+  vdtabprd_daicmo da_icm_o,
+  vdtabprd_desc desconto,
+  vdtabprd_descmax desconto_maximo,
+  vdtabprd_descvb desconto_verba,
+  vdtabprd_despac despac,
+  vdtabprd_tipotab origem_tabela,
+  vdtabprd_participabda participa_banda_preco,
+  NULL preco_custo_caixa,
+  NULL preco_custo_un,
+  vdtabprd_precopvv preco_pvv,
+  NULL promocao,
+  vdtabprd_restr_comerciais restricao,
+  vdtabprd_selo selo,
+  vdtabprd_tpcont tp_cont,
+  NULL uf_table_preco,
+  vdtabprd_valicm val_icms,
+  vdtabprd_valipi val_ipi,
+  vdtabprd_preco valor,
+  vdprdprd_codr codigo_produto_erp,
+  vdtabprd_dtvgf fim,
+  vdtabprd_bloqueio bloqueio
 FROM
-     CADPRD01
-    INNER JOIN  TABPRC01 ON cadprd01."vdprdprd_cfam" = tabprc01."vdtabprd_cfam"
-    AND cadprd01."vdprdprd_nro" = tabprc01."vdtabprd_nro"    
-    AND LEFT(Cast(tabprc01.vdtabprd_dtvgf AS VARCHAR(8)), 4) >= LEFT(Cast(Curdate() - 365 AS CHAR(4)), 4)
-    INNER JOIN  PAROCO01 ON tabprc01."vdtabprd_ano" = PAROCO01."VDPAROCO_ANOTAB_CARGA"
-    AND tabprc01."vdtabprd_mes" = PAROCO01."VDPAROCO_MESTAB_CARGA"
+  CADPRD01, PAROCO01
+INNER JOIN 
+  TABPRC01 ON vdprdprd_cfam = vdtabprd_cfam AND 
+              vdprdprd_nro = vdtabprd_nro
 WHERE	 
-    (		
-        cadprd01."VDPRDPRD_CODR" = @COD_PRODUTO
-        OR @COD_PRODUTO = 0
-    )
-	AND cadprd01."VDPRDPRD_DISP_PORTAL_WEB" = 1	
-	AND tabprc01."vdtabprd_preco" <> 0
-    AND (
-        Cast(
-            Cast(
-                Cast(tabprc01."vdtabprd_ano" AS CHAR(04)) || CASE WHEN tabprc01."vdtabprd_mes" <= 9 THEN Concat(
-                    '0',
-                    Cast(tabprc01."vdtabprd_mes" AS CHAR (1))
-                ) ELSE Cast(tabprc01."vdtabprd_mes" AS CHAR (2)) END || CASE WHEN tabprc01."vdtabprd_nmes" <= 9 THEN Concat(
-                    '0',
-                    Cast(tabprc01."vdtabprd_nmes" AS CHAR(1))
-                ) ELSE Cast(tabprc01."vdtabprd_nmes" AS CHAR(2)) END AS CHAR(08)
-            ) AS BIGINT
-        ) = @COD_TABELA
-        OR @COD_TABELA = 0
-    ) ;
-
+  (VDPRDPRD_CODR = @COD_PRODUTO OR @COD_PRODUTO = 0) AND 
+  VDPRDPRD_DISP_PORTAL_WEB = 1 AND 
+  vdtabprd_preco <> 0 AND
+  ((cast(cast(vdtabprd_ano as varchar(4)) || 
+  repeat('0',2-length(cast(vdtabprd_mes as varchar(2)))) || cast(vdtabprd_mes as varchar(2)) || 
+  repeat('0',2-length(cast(vdtabprd_nmes as varchar(2)))) || cast(vdtabprd_nmes as varchar(2)) as bigint) = @COD_TABELA) OR 
+  (@COD_TABELA = 0 AND vdtabprd_ano = VDPAROCO_ANOTAB_CARGA AND vdtabprd_mes = VDPAROCO_MESTAB_CARGA)) AND
+  vdtabprd_dtvgf >= CAST(DATETOSTR(Curdate(),'yyyymmdd') AS INT);
 
 DECLARE SET BIGINT @CODIGO_PROD = 0;
 DECLARE SET INT @CODIGO_FAMILIA = 0;
@@ -1205,7 +1177,7 @@ where(
 
 CREATE
 or replace VIEW  VW_RESTRICAO_COMERCIAL_CAPA AS
-SELECT CASE WHEN grptab01. "vdtabgrc_cancsn" = 0 THEN 1 ELSE 0 END AS ATIVO, grptab01. "vdtabgrc_grpcan" AS CODIGO_GRUPO_CANAL_ERP, grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP, grptab01. "vdtabgrc_divcan" AS DIVISAO_CANAL, grptab01. "vdtabgrc_valminped" AS VALOR_MINIMO_PEDIDO, grptab01. "vdtabgrc_canal" AS CODIGO_CANAL_ERP, CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 5 THEN Concat( '000', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 6 THEN Concat( '00', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 7 THEN Concat( '0', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 8 THEN Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR (8)) END END END END AS CODIGO_CLIENTE_ERP, grptab01. "vdtabgrc_condpag" AS CODIGO_CONDICAO_PAGAMENTO_ERP, grptab01. "vdtabgrc_tipcobr" AS CODIGO_TIPO_COBRANCA_ERP, VDTABGRC_VENDED CODIGO_VENDEDOR, VDTABGRC_GRPANALISE CODIGO_GRUPO_ANALISE FROM  GRPTAB01;
+SELECT CASE WHEN grptab01. "vdtabgrc_cancsn" = 0 THEN 1 ELSE 0 END AS ATIVO, grptab01. "vdtabgrc_grpcan" AS CODIGO_GRUPO_CANAL_ERP, grptab01. "vdtabgrc_seq" AS CODIGO_RESTRICAO_COMERCIAL_ERP, grptab01. "vdtabgrc_divcan" AS DIVISAO_CANAL, grptab01. "vdtabgrc_valminped" AS VALOR_MINIMO_PEDIDO, grptab01. "vdtabgrc_canal" AS CODIGO_CANAL_ERP, CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 5 THEN Concat( '000', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 6 THEN Concat( '00', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 7 THEN Concat( '0', Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) ELSE CASE WHEN Length( Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR(8)) ) = 8 THEN Cast(grptab01. "vdtabgrc_cliente" AS VARCHAR (8)) END END END END AS CODIGO_CLIENTE_ERP, grptab01. "vdtabgrc_condpag" AS CODIGO_CONDICAO_PAGAMENTO_ERP, grptab01. "vdtabgrc_tipcobr" AS CODIGO_TIPO_COBRANCA_ERP, VDTABGRC_VENDED CODIGO_VENDEDOR, VDTABGRC_GRPANALISE CODIGO_GRUPO_ANALISE, VDTABGRC_REGIAO REGIAO FROM  GRPTAB01;
 
 CREATE or replace VIEW  VW_RESTRICAO_COMERCIAL_ITEM AS 
 SELECT grptab01. "vdtabgrc_tab01" AS CODIGO_TABELA_PRECO,
@@ -3155,13 +3127,13 @@ DECLARE SET VARCHAR(3) @CODIGO_TIPO_PRODUTO = '';
 
 CREATE OR REPLACE VIEW VW_TIPO_PRODUTO AS
 SELECT 
-  GEGENCGM_NR CODIGO_TIPO_PRODUTO,
+  TRIM(GEGENCGM_NR) CODIGO_TIPO_PRODUTO,
   GEGENCGM_DESCRICAO_1 DESCRICAO_TIPO_PRODUTO
 FROM
   GEGENCGM
 WHERE 
   GEGENCGM_TIPO = 'TIPOPROD' AND
-  GEGENCGM_NR = @CODIGO_TIPO_PRODUTO OR @CODIGO_TIPO_PRODUTO = ''; 
+  TRIM(GEGENCGM_NR) = @CODIGO_TIPO_PRODUTO OR @CODIGO_TIPO_PRODUTO = ''; 
 
 DECLARE SET INT @CODIGO_MENSAGEM = 0;
 
