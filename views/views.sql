@@ -1,5 +1,5 @@
 create function datetostr.DATETOSTR(DATE, varchar(20)) RETURNS varchar(20);
-create function to_date.TO_DATE(varchar(20), varchar(20)) RETURNS DATE
+create function to_date.TO_DATE(varchar(20), varchar(20)) RETURNS DATE;
 
 CREATE OR REPLACE VIEW VW_DADOS_CLIENTE AS 
 SELECT 
@@ -303,8 +303,8 @@ CREATE OR replace VIEW  vw_cliente AS SELECT 0 AS abate_icms,
        VW_DADOS_CLIENTE. "vdclicli_restr_comerciais"                          AS restircao_comercial, 
        VW_DADOS_CLIENTE. "vdclicli_sigla"                                     AS sigla, 
        VW_DADOS_CLIENTE. "vdclicli_subcanal"                                  AS sub_canal, 
-       CASE WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR(12)), 1, 3) ELSE '0' END AS telefone_ddd,
-       CASE WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( cadcli01. "vdclicli_fone" AS CHAR ( 12)) WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR( 12)), 4, 12 ) ELSE CASE WHEN Char_length(Cast( cadcli01. "vdclicli_fone" AS CHAR(12 ))) = 1 THEN '0' ELSE Subblobtochar(Cast( cadcli01. "vdclicli_fone" AS CHAR( 12)), 3, 11 ) END END AS telefone_tronco, 
+       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12)), 1, 3) ELSE '0' END AS telefone_ddd,
+       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR ( 12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 4, 12 ) ELSE CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12 ))) = 1 THEN '0' ELSE Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 3, 11 ) END END AS telefone_tronco, 
        VW_DADOS_CLIENTE. "vdclicli_verba_fin_pro"   AS uso_verba_restrito_produto, 
        VW_DADOS_CLIENTE. "vdclicli_cat"             AS codigo_canal_erp, 
        VW_DADOS_CLIENTE. "vdclicli_cpg"             AS codigo_condicao_pagamento_erp, 
