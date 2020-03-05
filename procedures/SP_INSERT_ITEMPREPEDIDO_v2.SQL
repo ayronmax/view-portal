@@ -35,8 +35,12 @@
 											in itemValidadoBonificaoAutomatica     CHAR(001),       
 											in horaInicialPedido              bigint,
                                                                                         in ultimo_item                    CHAR(001),
-                                                                                        IN PRECO_NEGOCIADO SMALLINT,
+                                                                                        IN PRECO_NEGOCIADO SMALLINT,                                                                                        
+                                                                                        IN VALOR_LIQ_UMA_CAIXA DECIMAL(11,4),
+                                                                                        IN VALOR_LIQ_UM_AVULSO DECIMAL(11,4),
+                                                                                        IN VALOR_LIQ_FINAL DECIMAL(11,4),
                                                                                         IN VALOR_ACRESCIMO_CAPA DECIMAL(7,2),
+                                                                                        IN VALOR_DESCONTO_CAPA DECIMAL(7,2),
 											OUT STATUSMSG       SMALLINT,
 											OUT MSG             VARCHAR(255)
                        											) 	
@@ -100,7 +104,11 @@ BEGIN
 							VDPEDIPP_PREPRDUS ,
 							VDPEDIPP_MOTIVO,
 							VDPEDIPP_PRECO_NEGOC,
-							VDPEDIPP_VL_ACRESC_CAPA      							
+							VDPEDIPP_VL_LIQ_UMA_CAIXA,
+							VDPEDIPP_VL_LIQ_UM_AVULSO,
+							VDPEDIPP_VL_LIQ_FINAL,
+							VDPEDIPP_VL_ACRESC_CAPA,
+							VDPEDIPP_VL_DESCONTO_CAPA  							
 							)
 							VALUES (
 							COD_NEMP                         ,
@@ -118,8 +126,12 @@ BEGIN
 							valorLiquidoUmaCaixa             ,
 							valorLiquidoUmAvulso             ,
 							codigoMotivoOcorrencia,
-							PRECO_NEGOCIADO,
-							VALOR_ACRESCIMO_CAPA           
+							PRECO_NEGOCIADO,                                                                                        
+                                                        VALOR_LIQ_UMA_CAIXA,
+                                                        VALOR_LIQ_UM_AVULSO,
+                                                        VALOR_LIQ_FINAL,
+                                                        VALOR_ACRESCIMO_CAPA,
+                                                        VALOR_DESCONTO_CAPA           
 							);
 						    IF ultimo_item = 'S' THEN 
 			                   UPDATE VDPEDCPP SET VDPEDCPP_MOSTRA = 1 WHERE  VDPEDCPP_PRE_PED = COD_PRE_PEDIDO AND VDPEDCPP_NREMP = COD_NEMP;
@@ -133,7 +145,7 @@ BEGIN
 								VDPEDIPP_ITEM       ,                    
 								VDPEDIPP_OCOKD      ,         
 								VDPEDIPP_CODR       , 
-                                VDPEDIPP_PROD       ,								
+                                                                VDPEDIPP_PROD       ,								
 								VDPEDIPP_QTD        ,          
 								VDPEDIPP_QTDS       ,          
 								VDPEDIPP_TBPRD      ,          
@@ -170,7 +182,11 @@ BEGIN
 								VDPEDIPP_PREPRDT_CX       ,
 								VDPEDIPP_PREPRDT_AV,
 								VDPEDIPP_PRECO_NEGOC,
-							        VDPEDIPP_VL_ACRESC_CAPA
+							        VDPEDIPP_VL_LIQ_UMA_CAIXA,
+							        VDPEDIPP_VL_LIQ_UM_AVULSO,
+							        VDPEDIPP_VL_LIQ_FINAL,
+							        VDPEDIPP_VL_ACRESC_CAPA,
+							        VDPEDIPP_VL_DESCONTO_CAPA  							
 								)
 								VALUES (
 								COD_NEMP          ,
@@ -212,8 +228,12 @@ BEGIN
 								horaInicialPedido               ,
 							        (QUANTIDADE_CX  * valorLiquidoUmaCaixa),
 							        (QUANTIDADE_UN  * valorLiquidoUmAvulso ),
-							        PRECO_NEGOCIADO,
-							        VALOR_ACRESCIMO_CAPA
+							        VDPEDIPP_PRECO_NEGOC,
+							        VDPEDIPP_VL_LIQ_UMA_CAIXA,
+							        VDPEDIPP_VL_LIQ_UM_AVULSO,
+							        VDPEDIPP_VL_LIQ_FINAL,
+							        VDPEDIPP_VL_ACRESC_CAPA,
+							        VDPEDIPP_VL_DESCONTO_CAPA
 								);
 							IF ultimo_item = 'S' THEN 
 			                   UPDATE VDPEDCPP SET VDPEDCPP_MOSTRA = 1 WHERE VDPEDCPP_PRE_PED = COD_PRE_PEDIDO AND VDPEDCPP_NREMP = COD_NEMP;
