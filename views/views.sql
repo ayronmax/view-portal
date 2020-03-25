@@ -367,26 +367,19 @@ WHERE
 
 DECLARE SET INT @CODIGO_CONDICAO_PAGAMENTO = 0;
 
-CREATE
-or replace VIEW VW_CONDICAO_PAGAMENTO AS
-SELECT
-    condpg01."vdcadpag_ativo" AS ATIVO,
-    CASE
-              WHEN Length(Cast(VDCADPAG_COD AS VARCHAR(2))) = 1 THEN Concat('0',Cast(VDCADPAG_COD AS VARCHAR(2)))
-    ELSE
-              Cast(VDCADPAG_COD AS VARCHAR(2)) END AS CODIGO_CONDICAO_PAGAMENTO_ERP,
-    condpg01."vdcadpag_descr" AS DESCRICAO,
-    CASE WHEN condpg01."vdcadpag_cod" = 1 THEN 1 ELSE 0 END AS INFORMA_PRIMEIRA_PARCELA,
-    condpg01."vdcadpag_nrdias" AS NUMERO_DIAS,
-    condpg01."vdcadpag_prazo" AS PRAZO,
-VDCADPAG_SFA_DISP as disponivel
-FROM
-     CONDPG01
-WHERE
-    (
-        condpg01."vdcadpag_cod" = @CODIGO_CONDICAO_PAGAMENTO
-        OR @CODIGO_CONDICAO_PAGAMENTO = 0
-    ); 
+CREATE or replace VIEW VW_CONDICAO_PAGAMENTO AS SELECT
+condpg01. "vdcadpag_ativo" AS ATIVO,
+CASE WHEN Length(Cast(VDCADPAG_COD AS VARCHAR(2))) = 1 THEN Concat('0',Cast(VDCADPAG_COD AS VARCHAR(2)))
+ELSE Cast(VDCADPAG_COD AS VARCHAR(2)) END AS CODIGO_CONDICAO_PAGAMENTO_ERP,
+condpg01. "vdcadpag_descr" AS DESCRICAO,
+CASE WHEN condpg01. "vdcadpag_cod" = 1 THEN 1
+ELSE 0 END AS INFORMA_PRIMEIRA_PARCELA,
+condpg01. "vdcadpag_nrdias" AS NUMERO_DIAS,
+condpg01. "vdcadpag_prazo" AS PRAZO,
+VDCADPAG_SFA_DISP as DISPONIVEL,
+VDCADPAG_DISP_PORTAL_WEB as DISP_PORTAL
+FROM CONDPG01 
+WHERE (condpg01."vdcadpag_cod" = @CODIGO_CONDICAO_PAGAMENTO OR @CODIGO_CONDICAO_PAGAMENTO = 0);
 
 declare set int @pasta = 0;
 
