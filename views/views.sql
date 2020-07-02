@@ -1098,49 +1098,52 @@ DECLARE SET BIGINT @CODIGO_PROD = 0;
 DECLARE SET INT @CODIGO_FAMILIA = 0;
 DECLARE SET INT @CODIGO_SEQUENCIA = 0;
 
-CREATE
-or replace VIEW  VW_PRODUTO AS
+CREATE or replace VIEW VW_PRODUTO AS
 SELECT
-    CASE WHEN cadprd01."vdprdprd_flag" = 'A' THEN 1 ELSE 0 END AS ATIVO,
-    cadprd01."vdprdprd_bonifica_unid" AS BONIFICA_UNIDADE,
-    cadprd01."vdprdprd_clasf" AS CLASS_FISCAL,
-    NULL AS CODIGO_EAN_FAB,
-    cadprd01."vdprdprd_codr" AS CODIGO_PRODUTO_ERP,
-    cadprd01."vdprdprd_descr" AS DESCRICAO,
-    cadprd01."vdprdprd_descri" AS DESCRICAO_RED,
-    cadprd01."vdprdprd_ipipauta" AS IPI_PAUTA,
-    cadprd01."vdprdprd_linha" AS LINHA,
-    cadprd01."vdprdprd_medida" AS LITRAGEM,
-    NULL AS PERCENTUAL_BONUS_GERA,
-    NULL AS PERCENTUAL_BONUS_USA,
-    cadprd01."vdprdprd_permite_bonif" AS PERMITE_BONIFICACAO,
-    cadprd01."vdprdprd_peso" AS PESO,
-    cadprd01."vdprdprd_pesoemb" AS PESO_EMB,
-    cadprd01."vdprdprd_qtdminvd" AS QTD_MIN_VENDA_AV,
-    NULL AS QTD_MIN_VENDA_CX,
-    cadprd01."vdprdprd_qtdun" AS QUANTIDADE_CX,
-    cadprd01."vdprdprd_tipobanda" AS TIPO_BANDA,
-    cadprd01."vdprdprd_tpprd" AS TIPO_PRODUTO,
-    NULL AS UTILIZA_BANDA_PRECO_TIPO,
-    NULL AS VALOR_MINIMO_BONUS,
-    cadprd01."vdprdprd_tipoqtdvdcx" AS VENDA_MULTI_MIN_CX,
-    cadprd01."vdprdprd_tipoqtdvd" AS VENDA_MULTI_MIN_AV,
-    CASE WHEN cadprd01."vdprdprd_enc" = 'S' THEN 1 ELSE 0 END AS VENDA_AVULSO,
-    CASE WHEN cadprd01."vdprdprd_tpprd" = 'A' THEN 0 ELSE 1 END AS VISIBILIDADE_PORTAL,
-    cadprd01."vdprdprd_catprd" AS CODIGO_CATEGORIA_PRODUTO_ERP,
-    cadprd01."vdprdprd_cfam" AS CODIGO_FAMILIA_PRODUTO_ERP,
-    cadprd01."vdprdprd_grpprd" AS CODIGO_GRUPO_PRODUTO_ERP,
-    cadprd01."vdprdprd_marprd" AS CODIGO_MARCA_PRODUTO_ERP,
-    cadprd01."vdprdprd_disp_portal_web" AS DISP_PORTAL_WEB,
-	cadprd01."vdprdprd_cev" AS PERMITE_CEV
+  CASE WHEN vdprdprd_flag = 'A' THEN 1 ELSE 0 END AS ATIVO,
+  vdprdprd_bonifica_unid BONIFICA_UNIDADE,
+  vdprdprd_clasf CLASS_FISCAL,
+  NULL CODIGO_EAN_FAB,
+  vdprdprd_codr CODIGO_PRODUTO_ERP,
+  CASE WHEN (VDPRDPCR_DESC_PRD_PORTAL IS NOT NULL) OR VDPRDPCR_DESC_PRD_PORTAL <> '' THEN
+         VDPRDPCR_DESC_PRD_PORTAL
+       ELSE  
+         vdprdprd_descr 
+  END DESCRICAO,
+  vdprdprd_descri DESCRICAO_RED,
+  vdprdprd_ipipauta IPI_PAUTA,
+  vdprdprd_linha LINHA,
+  vdprdprd_medida LITRAGEM,
+  NULL PERCENTUAL_BONUS_GERA,
+  NULL PERCENTUAL_BONUS_USA,
+  vdprdprd_permite_bonif PERMITE_BONIFICACAO,
+  vdprdprd_peso PESO,
+  vdprdprd_pesoemb PESO_EMB,
+  vdprdprd_qtdminvd QTD_MIN_VENDA_AV,
+  NULL QTD_MIN_VENDA_CX,
+  vdprdprd_qtdun QUANTIDADE_CX,
+  vdprdprd_tipobanda TIPO_BANDA,
+  vdprdprd_tpprd TIPO_PRODUTO,
+  NULL UTILIZA_BANDA_PRECO_TIPO,
+  NULL VALOR_MINIMO_BONUS,
+  vdprdprd_tipoqtdvdcx VENDA_MULTI_MIN_CX,
+  vdprdprd_tipoqtdvd VENDA_MULTI_MIN_AV,
+  CASE WHEN vdprdprd_enc = 'S' THEN 1 ELSE 0 END VENDA_AVULSO,
+  CASE WHEN vdprdprd_tpprd = 'A' THEN 0 ELSE 1 END VISIBILIDADE_PORTAL,
+  vdprdprd_catprd CODIGO_CATEGORIA_PRODUTO_ERP,
+  vdprdprd_cfam CODIGO_FAMILIA_PRODUTO_ERP,
+  vdprdprd_grpprd CODIGO_GRUPO_PRODUTO_ERP,
+  vdprdprd_marprd CODIGO_MARCA_PRODUTO_ERP,
+  vdprdprd_disp_portal_web DISP_PORTAL_WEB,
+  vdprdprd_cev PERMITE_CEV
 FROM
-     CADPRD01
+  CADPRD01
+LEFT JOIN 
+  VDPRDPCR ON VDPRDPCR_CODR = VDPRDPRD_CODR
 WHERE
-    cadprd01."vdprdprd_cfam" > @CODIGO_FAMILIA
-    AND cadprd01."vdprdprd_nro" > @CODIGO_SEQUENCIA
-    AND (  cadprd01."vdprdprd_codr" = @CODIGO_PROD 
-                OR @CODIGO_PROD = 0) ;
-	
+  cadprd01."vdprdprd_cfam" > @CODIGO_FAMILIA AND 
+  cadprd01."vdprdprd_nro" > @CODIGO_SEQUENCIA AND 
+  (cadprd01."vdprdprd_codr" = @CODIGO_PROD OR @CODIGO_PROD = 0);
 	
 declare set integer @id =0;
 
