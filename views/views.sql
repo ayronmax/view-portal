@@ -3040,44 +3040,93 @@ FROM
 
 DECLARE SET BIGINT @numero_pedido = 0;
 
-CREATE
-or replace VIEW VW_HISTORICO_PEDIDO_CAPA AS
+CREATE OR REPLACE VIEW
+    VW_HISTORICO_PEDIDO_CAPA AS
 SELECT
-    CASE WHEN vdpedcpe_fl = 9 THEN 0 ELSE 1 END AS ATIVO,
-    vdpedcpe_motdev CODIGO_MOTIVO_DEVOLUCAO,
-    TO_DATE(SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),1,4), 'DDMMYYYY') AS DATA_HORA_EMISSAO_PEDIDO,
     CASE
-    WHEN vdpedcpe_dt1vc = 0 THEN TO_DATE(SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dtemiped as varchar(8)),1,4), 'DDMMYYYY')
-    ELSE
-    TO_DATE(SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),7,2) || SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),5,2) || SUBSTRING(cast(vdpedcpe_dt1vc as varchar(8)),1,4), 'DDMMYYYY') END AS DATA_VENCIMENTO,
-    vdpedcpe_descfi DESCONTO_FINANCEIRO,
-    vdpedcpe_nped NUMERO_PEDIDO,
-    vdpedcpe_desc PERCENTUAL_DESCONTO,
-    vdpedcpe_fl STATUS_PEDIDO,
-    vdpedcpe_txfin TAXA_FINANCEIRO,
+        WHEN vdpedcpe_fl = 9
+        THEN 0
+        ELSE 1
+    END             AS ATIVO,
+    vdpedcpe_motdev    CODIGO_MOTIVO_DEVOLUCAO,
+    TO_DATE(SUBSTRING(CAST(vdpedcpe_dtemiped AS VARCHAR(8)),7,2) || SUBSTRING(CAST
+    (vdpedcpe_dtemiped AS VARCHAR(8)),5,2) || SUBSTRING(CAST(vdpedcpe_dtemiped AS VARCHAR(8)),1,4),
+    'DDMMYYYY') AS DATA_HORA_EMISSAO_PEDIDO,
+    CASE
+        WHEN vdpedcpe_dt1vc = 0
+        THEN TO_DATE(SUBSTRING(CAST(vdpedcpe_dtemiped AS VARCHAR(8)),7,2) || SUBSTRING(CAST
+            (vdpedcpe_dtemiped AS VARCHAR(8)),5,2) || SUBSTRING(CAST(vdpedcpe_dtemiped AS VARCHAR(8
+            )),1,4), 'DDMMYYYY')
+        ELSE TO_DATE(SUBSTRING(CAST(vdpedcpe_dt1vc AS VARCHAR(8)),7,2) || SUBSTRING(CAST
+            (vdpedcpe_dt1vc AS VARCHAR(8)),5,2) || SUBSTRING(CAST(vdpedcpe_dt1vc AS VARCHAR(8)),1,4
+            ), 'DDMMYYYY')
+    END             AS DATA_VENCIMENTO,
+    vdpedcpe_descfi    DESCONTO_FINANCEIRO,
+    vdpedcpe_nped      NUMERO_PEDIDO,
+    vdpedcpe_desc      PERCENTUAL_DESCONTO,
+    vdpedcpe_fl        STATUS_PEDIDO,
+    vdpedcpe_txfin     TAXA_FINANCEIRO,
     numero_pedido_erp_reprogramado,
-    vdpedcpe_vlr_fcem_r + vdpedcpe_vlr_fsem_r + vdpedcpe_vlr_fctr_r + vdpedcpe_vlr_fstr_r VALOR_DEVOLUCAO,
+    vdpedcpe_vlr_fcem_r + vdpedcpe_vlr_fsem_r + vdpedcpe_vlr_fctr_r + vdpedcpe_vlr_fstr_r
+                                                                                  VALOR_DEVOLUCAO,
     vdpedcpe_vlr_fcem + vdpedcpe_vlr_fsem + vdpedcpe_vlr_fctr + vdpedcpe_vlr_fstr VALOR_PEDIDO,
-    CODIGO_CLIENTE CODIGO_CLIENTE_REC_ID,
-    vdpedcpe_cpg CODIGO_CONDICAO_PAGAMENTO_REC_ID,
-    vdpedcpe_tpcobr CODIGO_TIPO_COBRANCA_REC_ID,
-    VDCLICLI_CGC CNPJ_CPF,
+    CODIGO_CLIENTE                                                                CODIGO_CLIENTE_REC_ID
+    ,
+    vdpedcpe_cpg     CODIGO_CONDICAO_PAGAMENTO_REC_ID,
+    vdpedcpe_tpcobr  CODIGO_TIPO_COBRANCA_REC_ID,
+    VDCLICLI_CGC     CNPJ_CPF,
     VDCLICLI_RAZAO50 RAZAO_CLIENTE,
-    (SELECT VDCADPAG_DESCR FROM CONDPG01 WHERE vdcadpag_cod = vdpedcpe_cpg) DESCRICAO_CONDICAO_PAGAMENTO,
-    (SELECT vdcadtco_descricao FROM TPCOBR01 WHERE VDCADTCO_COD = vdpedcpe_tpcobr) DESCRICAO_TIPO_COBRANCA,
-    VDPEDCPE_SERIE SFISCAL,
-    VDPEDCPE_NFIS NFISCAL_INI,
-    VDPEDCPE_NFISULT NFISCAL_ULT
+    (
+        SELECT
+            VDCADPAG_DESCR
+        FROM
+            CONDPG01
+        WHERE
+            vdcadpag_cod = vdpedcpe_cpg) DESCRICAO_CONDICAO_PAGAMENTO,
+    (
+        SELECT
+            vdcadtco_descricao
+        FROM
+            TPCOBR01
+        WHERE
+            VDCADTCO_COD = vdpedcpe_tpcobr) DESCRICAO_TIPO_COBRANCA,
+    VDPEDCPE_SERIE                          SFISCAL,
+    VDPEDCPE_NFIS                           NFISCAL_INI,
+    VDPEDCPE_NFISULT                        NFISCAL_ULT
 FROM
-  PEDCP01
+    (
+        SELECT
+            *
+        FROM
+            PEDCP01
+        WHERE
+            vdpedcpe_nped >= CAST(trim(DATETOSTR(Curdate()-45,'yyyymmdd')) || '0000' AS bigint))
+    PEDCP01
 INNER JOIN
-  VW_DADOS_VDPEDFLC ON NUMERO_PEDIDO_VDPEDFLC = VDPEDCPE_NPED
-INNER JOIN 
-  VW_DADOS_CLIENTE ON VDCLICLI_REGI = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST(VDPEDCPE_CODCLI AS VARCHAR(8)),1,4) AS INT) AND VDCLICLI_NUM = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST(VDPEDCPE_CODCLI AS VARCHAR(8)),5,4) AS INT)
+    VW_DADOS_VDPEDFLC
+ON
+    NUMERO_PEDIDO_VDPEDFLC = VDPEDCPE_NPED
+INNER JOIN
+    VW_DADOS_CLIENTE
+ON
+    VDCLICLI_REGI = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) ||
+    CAST(VDPEDCPE_CODCLI AS VARCHAR(8)),1,4) AS INT)
+AND VDCLICLI_NUM = CAST(SUBSTRING(REPEAT('0',8-LENGTH(CAST(VDPEDCPE_CODCLI AS VARCHAR(8)))) || CAST
+    (VDPEDCPE_CODCLI AS VARCHAR(8)),5,4) AS INT)
 WHERE
-  vdpedcpe_nped >= cast(trim(DATETOSTR(Curdate()-45,'yyyymmdd')) || '0000' as bigint) AND
-  (VDPEDCPE_NPED = @numero_pedido OR @numero_pedido = 0) AND
-  CAST(SUBSTRING(CAST(VDPEDCPE_NPED AS VARCHAR(12)),9,4) AS INT) BETWEEN 1 AND 9999;
+    VDPEDCPE_NPED BETWEEN
+    CASE
+        WHEN @NUMERO_PEDIDO = 0
+        THEN 1
+        ELSE @NUMERO_PEDIDO
+    END
+AND
+    CASE
+        WHEN @NUMERO_PEDIDO = 0
+        THEN 999999999999
+        ELSE @NUMERO_PEDIDO
+    END
+AND CAST(SUBSTRING(CAST(VDPEDCPE_NPED AS VARCHAR(12)),9,4) AS INT) BETWEEN 1 AND 9999;
 
 DECLARE SET BIGINT @NUMERO_PEDIDO = 0;
 
