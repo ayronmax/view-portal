@@ -1,4 +1,4 @@
-create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP          smallint,
+create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 												   in  CODCLI        INT, 
 												   in  CNPJ_CPF      VARCHAR(015),
 												   in  origem        Char(001),
