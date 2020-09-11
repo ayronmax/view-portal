@@ -1,4 +1,4 @@
-create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
+create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP          smallint,
 												   in  CODCLI        INT, 
 												   in  CNPJ_CPF      VARCHAR(015),
 												   in  origem        Char(001),
@@ -41,6 +41,15 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 													IN desbloqueioGPSERP    SMALLINT,
 													in dataPrimeiraParcela INT,
                                                                                                         in codigoErpTerceiro smallint,
+                                                                                                        in vlrpagocielo DECIMAL(13,2),
+                                                                                                        in bandeiracielo SMALLINT,
+                                                                                                        in ordernumbercielo CHAR(068),
+                                                                                                        in tidcielo CHAR(020),
+                                                                                                        in digcartaocielo SMALLINT,
+                                                                                                        in statuscielo CHAR(003),
+                                                                                                        in datapagamentocielo CHAR(020),
+                                                                                                        in protocolocanccielo CHAR(020),
+                                                                                                        in datacanccielo CHAR(020),
                          									   OUT  NUMPREPEDIDO BIGINT, 
 												   OUT STATUSMSG     SMALLINT,
 												   out msg           varchar(255)
@@ -87,10 +96,10 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 			   else
 					set NUMPREPEDIDO = prepedido;
 					set STATUSMSG = 0;		
-					set msg = 'Capa de pre pedido já existe';
+					set msg = 'Capa de pre pedido j  existe';
 			   end if;
 			else
-			    if NEMP             = null or
+			   if NEMP             = null or
 				   dataEmissao      = null or 				   	 
 				   CGCNOVO          = null or 
 				   tipocob          = null or 
@@ -99,8 +108,11 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 				   UPPER(ORIGEM)    <> 'R' and  		  
 				   UPPER(ORIGEM)    <> 'L' then 
 				   set STATUSMSG = 0;		
-				   set msg = 'os campos NEMP,dataEmissao, CGCNOVO, tipocob, condpagamento, valor_liquido_portal são obrigatorio e origem so pode ser R (SFA) e L (Portal)';		 
+				   set msg = 'os campos NEMP,dataEmissao, CGCNOVO, tipocob, condpagamento, valor_liquido_portal s o obrigatorio e origem so pode ser R (SFA) e L (Portal)';		 
 			    else
+			       set prepedido = select VDPEDCPP_PRE_PED from VDPEDCPP where VDPEDCPP_NREMP = NEMP and VDPEDCPP_CODCLI = CODCLI and VDPEDCPP_VLRTOTAL = valor_liquido_portal and CAST(SUBSTRING(CAST(VDPEDCPP_PRE_PED AS VARCHAR(12)),1,8) AS INT) = dataEmissao and  VDPEDCPP_TPCOBR = tipocob and  VDPEDCPP_CPG = condpagamento;
+			       
+			       IF prepedido = null then
 				    IF UPPER(ORIGEM) = 'L' THEN 
 					    INSERT INTO VDPEDCPP(VDPEDCPP_NREMP      ,
 							 VDPEDCPP_PRE_PED    ,					 							 				 
@@ -131,7 +143,7 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 										valor_liquido_portal,
                                         dataPrimeiraParcela										
 										);
-				    ELSE  			
+				    ELSE 			
 					    INSERT INTO VDPEDCPP(VDPEDCPP_NREMP      ,
 							 VDPEDCPP_PRE_PED    ,					 							 					 
 							 VDPEDCPP_CODCLI     ,
@@ -175,18 +187,27 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 								VDPEDCPP_PEDIDO_TRANSMITIDO  ,								
 								VDPEDCPP_DESBLOQUEIO_GPS     ,
                                 VDPEDCPP_DT1VC ,
-                                VDPEDCPP_CODERP_TERCEIRO        								
+                                VDPEDCPP_CODERP_TERCEIRO,
+                                VDPEDCPP_VLR_PAGO_CIELO,
+                                VDPEDCPP_BANDEIRA_CIELO,
+                                VDPEDCPP_ORDER_NUMBER_CIELO,
+                                VDPEDCPP_TID_CIELO,
+                                VDPEDCPP_4_DIG_CARTAO_CIELO,
+                                VDPEDCPP_STATUS_CIELO,
+                                VDPEDCPP_DATA_PAGAMENTO_CIELO,
+                                VDPEDCPP_PROTOCOLO_CANC_CIELO,
+                                VDPEDCPP_DATA_CANC_CIELO        								
 							 ) 
 							 VALUES (   NEMP,
 										NUMEROPEDIDO,
 										
 										CODCLI,
 										CAST(CGCNOVO AS DECIMAL(15,0)),
-										UPPER(origem)    ,
+										UPPER(origem)    , 
 										CASE WHEN LENGTH(TRIM(CODVEN)) <> 8 THEN
 										    substring(codven,1,3)
 											else
-											substring(codven, 6, 3) end,											,
+											substring(codven, 6, 3) end,
 										tipocob   ,
 										condpagamento       ,																		
 										desconto      ,
@@ -198,7 +219,7 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 										rota                           ,  
 										dataEmissao                    ,  
 										valorBruto                     ,  
-										valorLiquidoSFA                   ,  
+										valorLiquidoSFA                ,  
 										valorBonificado                ,  
 										valorDesconto                  ,  
 										valorVerba                     ,  
@@ -222,25 +243,35 @@ create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP         smallint,
 										valorVerbaGeradaGL             ,  
 										valorVerbaUtilizadaGL          ,  
 										pedidoTransmitido              ,  										
-										desbloqueioGPSERP               ,
-										dataPrimeiraParcela,
-                                                                                codigoErpTerceiro
-
+										desbloqueioGPSERP              ,
+										dataPrimeiraParcela            ,
+                                                                                codigoErpTerceiro              ,
+				                                                vlrpagocielo                 ,
+                                                                                bandeiracielo                  ,
+                                                                                ordernumbercielo               ,
+                                                                                tidcielo                       ,
+                                                                                digcartaocielo                ,
+                                                                                statuscielo                    ,
+                                                                                datapagamentocielo             ,
+                                                                                protocolocanccielo     ,
+                                                                                datacanccielo
 										);	
-                    end if;										
+                         end if;										
 			set prepedido = select VDPEDCPP_PRE_PED from VDPEDCPP where VDPEDCPP_PRE_PED = NUMEROPEDIDO;
 			  if prepedido <> null then
 				set NUMPREPEDIDO = prepedido;
 				set STATUSMSG = 1;	
 				set msg = 'Incluido com sucesso';
 					
-		      else
+		          else
 				set STATUSMSG = 0;		
 				set msg = 'Erro ao incluir';	
-			  end if;	 
+			  end if;
+			else
+			  set NUMPREPEDIDO = prepedido;
+			  set STATUSMSG = 0;		
+			  set msg = 'Registro duplicado';   	 
 			end if;
+		 end if;	
 	    end if;	
-		 
-		  
-				
-		END;
+	END;
