@@ -23,8 +23,8 @@ BEGIN
 		declare cod_produto  int;
         SET cod_produto     = CAST( codigo_produto AS INT);					
 		
-		set produto_cfam = select VDPRDPRD_CFAM from cadprd61 where VDPRDPRD_CODR = cod_produto;
-		set produto_nro  = select VDPRDPRD_NRO  from cadprd61 where VDPRDPRD_CODR = cod_produto;
+		set produto_cfam = select VDPRDPRD_CFAM from cadprd01 where VDPRDPRD_CODR = cod_produto;
+		set produto_nro  = select VDPRDPRD_NRO  from cadprd01 where VDPRDPRD_CODR = cod_produto;
 		
 		
 		
@@ -55,14 +55,14 @@ BEGIN
 		     
 		     
 		     set vendedor = SUBSTRING(cod_vendedor,6,4);					
-		     set seq = select VDGERCOC_SEQ from CONCOR61 where VDGERCOC_COD = concorrente;
+		     set seq = select VDGERCOC_SEQ from CONCOR01 where VDGERCOC_COD = concorrente;
 		       
 		     
 		     if seq = null then
 		     	set seq = 1;
 		     end if;
 		     
-		     set pesquisa = select VDGERPVD_CFAM from pesqvd61 where VDGERPVD_VERSAO = versao_pesquisa and
+		     set pesquisa = select VDGERPVD_CFAM from pesqvd01 where VDGERPVD_VERSAO = versao_pesquisa and
 		     														 VDGERPVD_CFAM = produto_cfam and
 		     														 VDGERPVD_NRO  = produto_nro and
 		     														 VDGERPVD_SEQ = seq and
@@ -70,7 +70,7 @@ BEGIN
 		     														 VDGERPVD_REGI = regiao_cli and
 		     														 VDGERPVD_NUM = num_cliente ;
 		     if pesquisa <> null then 
-		     	delete from pesqvd61 where VDGERPVD_VERSAO = versao_pesquisa and
+		     	delete from pesqvd01 where VDGERPVD_VERSAO = versao_pesquisa and
 		     							   VDGERPVD_CFAM = produto_cfam and
 		     							   VDGERPVD_NRO  = produto_nro and
 		     							   VDGERPVD_SEQ = seq and
@@ -80,7 +80,7 @@ BEGIN
 		     end if;
 		     
 		     
-		     insert into pesqvd61(
+		     insert into pesqvd01(
 		     				VDGERPVD_VERSAO,
 		     				VDGERPVD_CFAM,
 		     				VDGERPVD_NRO,
@@ -89,6 +89,7 @@ BEGIN
 		     				VDGERPVD_REGI,
 		     				VDGERPVD_NUM,
 		     				VDGERPVD_VENDEDOR,
+							VDGERPVD_PRESSAO,
 		     				VDGERPVD_MOTIVO,
 		     				VDGERPVD_DATA_PESQ,
 		     				VDGERPVD_QTD_COMPRA,
@@ -106,6 +107,7 @@ BEGIN
 		     			regiao_cli,
 		     			num_cliente,
 		     			vendedor,
+						case WHEN motivo = '*' THEN motivo else '' END,
 		     			motivo,
 		     			CAST( data_pesq AS INT),
 		     			qtd_compra,
@@ -115,7 +117,7 @@ BEGIN
 		     ) ;
 		     
 		     if motivo = null or motivo = '*' or motivo = ''  then 		   		
-		     	  delete from pesqvd61 where VDGERPVD_VERSAO = versao_pesquisa and
+		     	  delete from pesqvd01 where VDGERPVD_VERSAO = versao_pesquisa and
 		     										   VDGERPVD_CFAM = produto_cfam and
 		     										   VDGERPVD_NRO  = produto_nro and
 		     										   VDGERPVD_SEQ = seq and
@@ -130,7 +132,7 @@ BEGIN
 		   
 		      
 		   end if ;		
-           set pesquisa = select VDGERPVD_CFAM from pesqvd61 where VDGERPVD_VERSAO = versao_pesquisa and
+           set pesquisa = select VDGERPVD_CFAM from pesqvd01 where VDGERPVD_VERSAO = versao_pesquisa and
 		   																	 VDGERPVD_CFAM = produto_cfam and
 		   																	 VDGERPVD_NRO  = produto_nro and
 		   																	 VDGERPVD_SEQ = seq and

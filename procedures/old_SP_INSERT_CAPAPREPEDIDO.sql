@@ -1,4 +1,4 @@
-        create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP          smallint,
+create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP          smallint,
 												   in  CODCLI        INT, 
 												   in  CNPJ_CPF      VARCHAR(015),
 												   in  origem        Char(001),
@@ -41,6 +41,15 @@
 													IN desbloqueioGPSERP    SMALLINT,
 													in dataPrimeiraParcela INT,
                                                                                                         in codigoErpTerceiro smallint,
+                                                                                                        in vlrpagocielo DECIMAL(13,2),
+                                                                                                        in bandeiracielo SMALLINT,
+                                                                                                        in ordernumbercielo CHAR(068),
+                                                                                                        in tidcielo CHAR(020),
+                                                                                                        in digcartaocielo SMALLINT,
+                                                                                                        in statuscielo CHAR(003),
+                                                                                                        in datapagamentocielo CHAR(020),
+                                                                                                        in protocolocanccielo CHAR(020),
+                                                                                                        in datacanccielo CHAR(020),
                          									   OUT  NUMPREPEDIDO BIGINT, 
 												   OUT STATUSMSG     SMALLINT,
 												   out msg           varchar(255)
@@ -116,9 +125,7 @@
 							 VDPEDCPP_DESC       ,
 							 VDPEDCPP_TXFIN      ,
 							 VDPEDCPP_VLRTOTAL   ,
-							 VDPEDCPP_DT1VC		 ,
-							 VDPEDCPP_INCLDT     ,
-							 VDPEDCPP_INCLSIGLA
+							 VDPEDCPP_DT1VC
 							 ) 
 							 VALUES (   NEMP,
 										NUMEROPEDIDO,										
@@ -134,9 +141,7 @@
 										desconto      ,
 										taxa_fin      ,
 										valor_liquido_portal,
-                                        dataPrimeiraParcela,
-                                        dataEmissao,
-										'POR'										
+                                        dataPrimeiraParcela										
 										);
 				    ELSE 			
 					    INSERT INTO VDPEDCPP(VDPEDCPP_NREMP      ,
@@ -181,10 +186,17 @@
 								VDPEDCPP_VAL_VERBA_UTILIZ    ,
 								VDPEDCPP_PEDIDO_TRANSMITIDO  ,								
 								VDPEDCPP_DESBLOQUEIO_GPS     ,
-                                VDPEDCPP_DT1VC 				 ,
-                                VDPEDCPP_CODERP_TERCEIRO	 ,
-								VDPEDCPP_INCLDT	 			 ,
-							    VDPEDCPP_INCLSIGLA								
+                                VDPEDCPP_DT1VC ,
+                                VDPEDCPP_CODERP_TERCEIRO,
+                                VDPEDCPP_VLR_PAGO_CIELO,
+                                VDPEDCPP_BANDEIRA_CIELO,
+                                VDPEDCPP_ORDER_NUMBER_CIELO,
+                                VDPEDCPP_TID_CIELO,
+                                VDPEDCPP_4_DIG_CARTAO_CIELO,
+                                VDPEDCPP_STATUS_CIELO,
+                                VDPEDCPP_DATA_PAGAMENTO_CIELO,
+                                VDPEDCPP_PROTOCOLO_CANC_CIELO,
+                                VDPEDCPP_DATA_CANC_CIELO        								
 							 ) 
 							 VALUES (   NEMP,
 										NUMEROPEDIDO,
@@ -207,7 +219,7 @@
 										rota                           ,  
 										dataEmissao                    ,  
 										valorBruto                     ,  
-										valorLiquidoSFA                   ,  
+										valorLiquidoSFA                ,  
 										valorBonificado                ,  
 										valorDesconto                  ,  
 										valorVerba                     ,  
@@ -232,11 +244,17 @@
 										valorVerbaUtilizadaGL          ,  
 										pedidoTransmitido              ,  										
 										desbloqueioGPSERP              ,
-										dataPrimeiraParcela			   ,
-                                        codigoErpTerceiro			   ,
-										dataEmissao					   ,
-										'POR'
-
+										dataPrimeiraParcela            ,
+                                                                                codigoErpTerceiro              ,
+				                                                vlrpagocielo                 ,
+                                                                                bandeiracielo                  ,
+                                                                                ordernumbercielo               ,
+                                                                                tidcielo                       ,
+                                                                                digcartaocielo                ,
+                                                                                statuscielo                    ,
+                                                                                datapagamentocielo             ,
+                                                                                protocolocanccielo     ,
+                                                                                datacanccielo
 										);	
                          end if;										
 			set prepedido = select VDPEDCPP_PRE_PED from VDPEDCPP where VDPEDCPP_PRE_PED = NUMEROPEDIDO;
@@ -256,4 +274,4 @@
 			end if;
 		 end if;	
 	    end if;	
-	END;                          
+	END;

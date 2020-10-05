@@ -1,4 +1,4 @@
-create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP          smallint,
+        create OR REPLACE procedure SP_INSERT_CAPAPREPEDIDO ( in  NEMP          smallint,
 												   in  CODCLI        INT, 
 												   in  CNPJ_CPF      VARCHAR(015),
 												   in  origem        Char(001),
@@ -41,15 +41,6 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 													IN desbloqueioGPSERP    SMALLINT,
 													in dataPrimeiraParcela INT,
                                                                                                         in codigoErpTerceiro smallint,
-                                                                                                        in vlrpagocielo DECIMAL(13,2),
-                                                                                                        in bandeiracielo SMALLINT,
-                                                                                                        in ordernumbercielo CHAR(068),
-                                                                                                        in tidcielo CHAR(020),
-                                                                                                        in digcartaocielo SMALLINT,
-                                                                                                        in statuscielo CHAR(003),
-                                                                                                        in datapagamentocielo CHAR(020),
-                                                                                                        in protocolocanccielo CHAR(020),
-                                                                                                        in datacanccielo CHAR(020),
                          									   OUT  NUMPREPEDIDO BIGINT, 
 												   OUT STATUSMSG     SMALLINT,
 												   out msg           varchar(255)
@@ -125,7 +116,9 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 							 VDPEDCPP_DESC       ,
 							 VDPEDCPP_TXFIN      ,
 							 VDPEDCPP_VLRTOTAL   ,
-							 VDPEDCPP_DT1VC
+							 VDPEDCPP_DT1VC		 ,
+							 VDPEDCPP_INCLDT     ,
+							 VDPEDCPP_INCLSIGLA
 							 ) 
 							 VALUES (   NEMP,
 										NUMEROPEDIDO,										
@@ -141,7 +134,9 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 										desconto      ,
 										taxa_fin      ,
 										valor_liquido_portal,
-                                        dataPrimeiraParcela										
+                                        dataPrimeiraParcela,
+                                        dataEmissao,
+										'POR'										
 										);
 				    ELSE 			
 					    INSERT INTO VDPEDCPP(VDPEDCPP_NREMP      ,
@@ -186,17 +181,10 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 								VDPEDCPP_VAL_VERBA_UTILIZ    ,
 								VDPEDCPP_PEDIDO_TRANSMITIDO  ,								
 								VDPEDCPP_DESBLOQUEIO_GPS     ,
-                                VDPEDCPP_DT1VC ,
-                                VDPEDCPP_CODERP_TERCEIRO,
-                                VDPEDCPP_VLR_PAGO_CIELO,
-                                VDPEDCPP_BANDEIRA_CIELO,
-                                VDPEDCPP_ORDER_NUMBER_CIELO,
-                                VDPEDCPP_TID_CIELO,
-                                VDPEDCPP_4_DIG_CARTAO_CIELO,
-                                VDPEDCPP_STATUS_CIELO,
-                                VDPEDCPP_DATA_PAGAMENTO_CIELO,
-                                VDPEDCPP_PROTOCOLO_CANC_CIELO,
-                                VDPEDCPP_DATA_CANC_CIELO        								
+                                VDPEDCPP_DT1VC 				 ,
+                                VDPEDCPP_CODERP_TERCEIRO	 ,
+								VDPEDCPP_INCLDT	 			 ,
+							    VDPEDCPP_INCLSIGLA								
 							 ) 
 							 VALUES (   NEMP,
 										NUMEROPEDIDO,
@@ -219,7 +207,7 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 										rota                           ,  
 										dataEmissao                    ,  
 										valorBruto                     ,  
-										valorLiquidoSFA                ,  
+										valorLiquidoSFA                   ,  
 										valorBonificado                ,  
 										valorDesconto                  ,  
 										valorVerba                     ,  
@@ -244,17 +232,11 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 										valorVerbaUtilizadaGL          ,  
 										pedidoTransmitido              ,  										
 										desbloqueioGPSERP              ,
-										dataPrimeiraParcela            ,
-                                                                                codigoErpTerceiro              ,
-				                                                vlrpagocielo                 ,
-                                                                                bandeiracielo                  ,
-                                                                                ordernumbercielo               ,
-                                                                                tidcielo                       ,
-                                                                                digcartaocielo                ,
-                                                                                statuscielo                    ,
-                                                                                datapagamentocielo             ,
-                                                                                protocolocanccielo     ,
-                                                                                datacanccielo
+										dataPrimeiraParcela			   ,
+                                        codigoErpTerceiro			   ,
+										dataEmissao					   ,
+										'POR'
+
 										);	
                          end if;										
 			set prepedido = select VDPEDCPP_PRE_PED from VDPEDCPP where VDPEDCPP_PRE_PED = NUMEROPEDIDO;
@@ -274,4 +256,4 @@ create OR REPLACE procedure DBCONTROL2187002.SP_INSERT_CAPAPREPEDIDO ( in  NEMP 
 			end if;
 		 end if;	
 	    end if;	
-	END;
+	END;                          
