@@ -1,5 +1,6 @@
 create function datetostr.DATETOSTR(DATE, varchar(20)) RETURNS varchar(20);
 create function to_date.TO_DATE(varchar(20), varchar(20)) RETURNS DATE;
+create function datetostr.TIMETOSTR(TIME, varchar(20)) RETURNS varchar(20);
 
 CREATE OR REPLACE VIEW VW_DADOS_CLIENTE AS 
 SELECT 
@@ -14,7 +15,8 @@ INNER JOIN
    FROM CADREG01) CADREG01 
    ON VDCLIREG_COD = VDCLICLI_REGI AND 
       VDCLIREG_NUMSUBEMPRESA_BW 
-   BETWEEN 0000 AND 9999;
+   BETWEEN 0000 AND 9999 AND
+   cast(Substring(Cast(vdclicli_codclicia3 AS VARCHAR(4)), 1,4 ) AS INT) BETWEEN 000 AND 999;
 
 DECLARE SET INT @CODIGOPEDIDO = 0;
 
@@ -48,7 +50,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_1 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_1 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_1" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -64,7 +66,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_2 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_2 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_2" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -80,7 +82,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_3 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_3 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_3" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -96,7 +98,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_4 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_4 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_4" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -112,7 +114,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_5 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_5 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_5" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -128,7 +130,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_6 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_6 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_6" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -144,7 +146,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_7 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_7 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_7" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -160,7 +162,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_8 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_8 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_8" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -176,7 +178,7 @@ ON              tabprc01.vdtabprd_ano = Cast(Substring(Cast(bdapre01.vdprdbda_ta
 AND             tabprc01.vdtabprd_mes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_9 AS  VARCHAR(8)), 5,2 ) AS INT)
 AND             tabprc01.vdtabprd_nmes = Cast(Substring(Cast(bdapre01.vdprdbda_tab_x_9 AS VARCHAR(8)), 7,2 ) AS INT)
 WHERE           bdapre01. "vdprdbda_bandprec_9" <> 0 
-AND             bdapre01. "vdprdbda_cancsn" = 0 
+
 AND             ( 
                                 bdapre01. "vdprdbda_id" = @CODIGO_BANDA 
                 OR              @CODIGO_BANDA = 0 ) 
@@ -304,13 +306,21 @@ CREATE OR replace VIEW  vw_cliente AS SELECT 0 AS abate_icms,
        VW_DADOS_CLIENTE. "vdclicli_sigla"                                     AS sigla, 
        VW_DADOS_CLIENTE. "vdclicli_subcanal"                                  AS sub_canal, 
        CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 11 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12)), 1, 3) ELSE '0' END AS telefone_ddd,
-       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR ( 12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 12 THEN Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 4, 12 ) ELSE CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12 ))) = 1 THEN '0' ELSE Subblobtochar(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 3, 11 ) END END AS telefone_tronco, 
+       CASE WHEN VW_DADOS_CLIENTE. "vdclicli_fone" is null THEN'0' WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR ( 12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 4, 12 ) ELSE CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR(12 ))) = 1 THEN '0' ELSE substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR( 12)), 3, 11 ) END END AS telefone_tronco,
        VW_DADOS_CLIENTE. "vdclicli_verba_fin_pro"   AS uso_verba_restrito_produto, 
        VW_DADOS_CLIENTE. "vdclicli_cat"             AS codigo_canal_erp, 
        VW_DADOS_CLIENTE. "vdclicli_cpg"             AS codigo_condicao_pagamento_erp, 
        VW_DADOS_CLIENTE. "vdclicli_tpcobra"         AS codigo_tipo_cobranca_erp , 
        VW_DADOS_CLIENTE. "vdclicli_disp_portal_web" AS disponivel_portal ,
-	   VW_DADOS_CLIENTE."VDCLICLI_CEL1" as celular
+       CASE WHEN VW_DADOS_CLIENTE. "VDCLICLI_CEL1" is null then 0 else VW_DADOS_CLIENTE. "VDCLICLI_CEL1" end as celular,
+       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR (12))) = 11 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR(12)), 1, 3) ELSE '0' END AS telefone2_ddd,
+       CASE WHEN VW_DADOS_CLIENTE. "vdclicli_fone" is null or  Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR(12))) = 1 THEN '0' WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR (12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR(12)), 4, 12 )  ELSE substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fone2" AS CHAR(12)), 3, 11 ) END AS telefone2_tronco,
+       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR (12))) = 11 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR(12)), 1, 3) ELSE '0' END AS celular_ddd,
+       CASE WHEN VW_DADOS_CLIENTE. "vdclicli_cel1" is null or Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR(12))) = 1 THEN '0' WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR (12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR(12)), 4, 12 ) ELSE substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel1" AS CHAR(12)), 3, 11 ) END AS celular_tronco,
+       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR (12))) = 11 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR(12)), 1, 3) ELSE '0' END AS celular2_ddd,
+       CASE WHEN VW_DADOS_CLIENTE. "vdclicli_cel2" is null or Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR(12))) = 1 THEN '0' WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR (12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR(12)), 4, 12 )  ELSE substring(Cast( VW_DADOS_CLIENTE. "vdclicli_cel2" AS CHAR(12)), 3, 11 ) END AS celular2_tronco,
+       CASE WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR (12))) = 11 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR(12)), 1, 2) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR(12)), 1, 3) ELSE '0' END AS telefone3_ddd,
+       CASE WHEN VW_DADOS_CLIENTE. "vdclicli_fax" is null or Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR(12))) = 1 THEN '0' WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR (12))) <= 9 THEN Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR (12)) WHEN Char_length(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR (12))) = 12 THEN substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR(12)), 4, 12 ) ELSE substring(Cast( VW_DADOS_CLIENTE. "vdclicli_fax" AS CHAR(12)), 3, 11 ) END AS telefone3_tronco 
 FROM    VW_DADOS_CLIENTE , 
         paroco01 
 WHERE  
@@ -369,8 +379,7 @@ DECLARE SET INT @CODIGO_CONDICAO_PAGAMENTO = 0;
 
 CREATE or replace VIEW VW_CONDICAO_PAGAMENTO AS SELECT
 condpg01. "vdcadpag_ativo" AS ATIVO,
-CASE WHEN Length(Cast(VDCADPAG_COD AS VARCHAR(2))) = 1 THEN Concat('0',Cast(VDCADPAG_COD AS VARCHAR(2)))
-ELSE Cast(VDCADPAG_COD AS VARCHAR(2)) END AS CODIGO_CONDICAO_PAGAMENTO_ERP,
+condpg01. "vdcadpag_cod" AS CODIGO_CONDICAO_PAGAMENTO_ERP,
 condpg01. "vdcadpag_descr" AS DESCRICAO,
 CASE WHEN condpg01. "vdcadpag_cod" = 1 THEN 1
 ELSE 0 END AS INFORMA_PRIMEIRA_PARCELA,
@@ -976,7 +985,7 @@ SELECT
     VDPAROCO_CAN_GRPCAN_BANDPREC AS BANDA_CAN_GRPCAN,
     VDPAROC2_BLOQ_OCOR_DIST PERMITE_OCOR_DISTINTA,
     VDPAROC2_CTRL_PRAZOCLI_PALM CTRL_PRAZO_CLI_PALM,
-    VDPAROC2_S_CANC_PED_PORTAL SENHA_CANC_PED_PORTAL
+    VDPAROC2_S_CANC_PED_PORTAL SENHA_CANCELAMENTO
 FROM
   PAROCO01
 LEFT JOIN
@@ -1011,7 +1020,7 @@ FROM
   PEDCP01
 WHERE
   (Cast(vdpedcpe_nped AS VARCHAR(12)) = @CODIGO_PEDIDO OR @CODIGO_PEDIDO = '') AND
-  ((vdpedcpe_fl IN (7,5,4,3,2,1) AND @CODIGO_PEDIDO = '') OR (vdpedcpe_fl IN (7,5,4,3,2,1,0) AND @CODIGO_PEDIDO <> ''));
+  ((vdpedcpe_fl IN (9,7,5,4,3,2,1) AND @CODIGO_PEDIDO = '') OR (vdpedcpe_fl IN (9,7,5,4,3,2,1,0) AND @CODIGO_PEDIDO <> ''));
 
 CREATE OR REPLACE VIEW VW_PEDIDO_SUGESTAO AS
 SELECT
@@ -1078,7 +1087,13 @@ SELECT
   vdtabprd_preco valor,
   vdprdprd_codr codigo_produto_erp,
   vdtabprd_dtvgf fim,
-  vdtabprd_bloqueio bloqueio
+  vdtabprd_bloqueio bloqueio,
+  VDTABPRD_PRECOUN as VALOR_UN,
+  VDTABPRD_PRECOPVVUN as PRECO_PVV_UN,
+  VDTABPRD_VALICMUN as VAL_ICMS_UN,
+  VDTABPRD_VALIPIUN as VAL_IPI_UN,
+  VDTABPRD_DESPACUN as DESPAC_UN,
+  VDTABPRD_SELOUN as SELO_UN
 FROM
   CADPRD01, PAROCO01
 INNER JOIN 
@@ -1086,7 +1101,6 @@ INNER JOIN
               vdprdprd_nro = vdtabprd_nro
 WHERE	 
   (VDPRDPRD_CODR = @COD_PRODUTO OR @COD_PRODUTO = 0) AND 
-  VDPRDPRD_DISP_PORTAL_WEB = 1 AND 
   vdtabprd_preco <> 0 AND
   ((cast(cast(vdtabprd_ano as varchar(4)) || 
   repeat('0',2-length(cast(vdtabprd_mes as varchar(2)))) || cast(vdtabprd_mes as varchar(2)) || 
@@ -1105,11 +1119,7 @@ SELECT
   vdprdprd_clasf CLASS_FISCAL,
   NULL CODIGO_EAN_FAB,
   vdprdprd_codr CODIGO_PRODUTO_ERP,
-  CASE WHEN (VDPRDPCR_DESC_PRD_PORTAL IS NOT NULL) OR VDPRDPCR_DESC_PRD_PORTAL <> '' THEN
-         VDPRDPCR_DESC_PRD_PORTAL
-       ELSE  
-         vdprdprd_descr 
-  END DESCRICAO,
+  vdprdprd_descr DESCRICAO,  
   vdprdprd_descri DESCRICAO_RED,
   vdprdprd_ipipauta IPI_PAUTA,
   vdprdprd_linha LINHA,
@@ -1135,7 +1145,8 @@ SELECT
   vdprdprd_grpprd CODIGO_GRUPO_PRODUTO_ERP,
   vdprdprd_marprd CODIGO_MARCA_PRODUTO_ERP,
   vdprdprd_disp_portal_web DISP_PORTAL_WEB,
-  vdprdprd_cev PERMITE_CEV
+  vdprdprd_cev PERMITE_CEV,
+  CASE WHEN VDPRDPCR_DESC_PRD_PORTAL is null or VDPRDPCR_DESC_PRD_PORTAL = '' or VDPRDPCR_DESC_PRD_PORTAL = ' ' then vdprdprd_descri else VDPRDPCR_DESC_PRD_PORTAL end as descr_portal
 FROM
   CADPRD01
 LEFT JOIN 
@@ -1783,7 +1794,8 @@ SELECT
     tpcobr01."vdcadtco_perm06" AS PERM06,
     tpcobr01."vdcadtco_perm07" AS PERM07,
     tpcobr01."vdcadtco_perm08" AS PERM08,
-    tpcobr01."vdcadtco_perm09" AS PERM09             
+    tpcobr01."vdcadtco_perm09" AS PERM09,
+	vdcadtcc_disp_portal_web AS disponivel_portal
 FROM tpcobr01
 WHERE
     (
@@ -1920,51 +1932,7 @@ SELECT
 FROM
   VW_DADOS_CLIENTE
 WHERE
-  CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = ''
-UNION ALL
-SELECT
-  1 ATIVO,
-  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
-  2 VENDEDOR,
-  VDCLICLI_VEN2 CODIGO_VENDEDOR_ERP,
-  VDCLICLI_CODPASTA2 PASTA_VISITA
-FROM
-  VW_DADOS_CLIENTE
-WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN2 <> ''    
-UNION ALL
-SELECT
-  1 ATIVO,
-  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
-  3 VENDEDOR,
-  VDCLICLI_VEN3 CODIGO_VENDEDOR_ERP,
-  VDCLICLI_CODPASTA3 PASTA_VISITA
-FROM
-  VW_DADOS_CLIENTE
-WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN3 <> ''    
-UNION ALL
-SELECT
-  1 ATIVO,
-  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
-  4 VENDEDOR,
-  VDCLICLI_VEN4 CODIGO_VENDEDOR_ERP,
-  VDCLICLI_CODPASTA4 PASTA_VISITA
-FROM
-  VW_DADOS_CLIENTE
-WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN4 <> ''
-UNION ALL    
-SELECT
-  1 ATIVO,
-  CODIGO_CLIENTE CODIGO_CLIENTE_ERP,
-  5 VENDEDOR,
-  VDCLICLI_VEN5 CODIGO_VENDEDOR_ERP,
-  VDCLICLI_CODPASTA5 PASTA_VISITA
-FROM
-  VW_DADOS_CLIENTE
-WHERE
-  (CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '') AND VDCLICLI_VEN5 <> '';    
+  CODIGO_CLIENTE = @CODIGO_CLIENTE OR @CODIGO_CLIENTE = '';
 
 
 declare set int @pasta = 0;
@@ -2964,7 +2932,7 @@ declare set bigint @CODIGO_BANDA = 0;
 
 CREATE OR REPLACE VIEW VW_BANDA_PRECO_CAPA AS
 SELECT DISTINCT
-    1 ATIVO, 
+    CASE WHEN B.vdprdbda_cancsn = 1 THEN 0 ELSE 1 END AS ATIVO, 
     B.vdprdbda_id CODIGO_BANDA_PRECO_ERP, 
     NULL CODIGO_FAMEB, 
     B.vdprdbda_grpcli CODIGO_GRUPO_ANALISE_CLI, 
@@ -2986,7 +2954,7 @@ SELECT DISTINCT
     B.vdprdbda_grpesc grupo_escalonado, 
     (SELECT vdprdprd_codr FROM cadprd01 WHERE vdprdprd_cfam = B.vdprdbda_fam AND vdprdprd_nro = B.vdprdbda_prd) CODIGO_PRODUTO_ERP, 
     B.vdprdbda_cpg CODIGO_CONDICAO_PAGAMENTO_ERP, 
-    A.sequencia SEQUENCIA 
+    A.sequencia SEQUENCIA
   FROM 
     (SELECT 
        * 
@@ -3017,7 +2985,6 @@ SELECT DISTINCT
     A.grupo_canal = CASE WHEN (B.vdprdbda_can = NULL OR B.vdprdbda_can = '') THEN 0 ELSE 1 end AND
     A.cond_pagto = CASE WHEN (B.vdprdbda_cpg = NULL OR B.vdprdbda_cpg = 0) THEN 0 ELSE 1 end AND
     A.grp_escalonado = CASE WHEN (B.vdprdbda_grpesc = NULL OR B.vdprdbda_grpesc = 0) THEN 0 ELSE 1 end AND
-    B.vdprdbda_cancsn = 0 AND
     (B.vdprdbda_id = @codigo_banda OR @codigo_banda = 0); 						
 
 // Necessario informar o número da empresa (VDPEDFLC_NREMP = x)
@@ -3183,7 +3150,7 @@ WHERE
 
 DECLARE SET INT @CODIGO_MENSAGEM = 0;
 
-CREATE OR REPLACE VIEW VW_MENSAGENS_SFA AS
+CREATE OR REPLACE VIEW VW_MENSAGENS AS
 SELECT 
   VDCLIGMP_COD CODIGO_MENSAGEM,
   CASE WHEN VDCLIGMP_TIPO = 1 THEN 
