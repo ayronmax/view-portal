@@ -1,0 +1,382 @@
+LEVANTAMENTO SFA-COKE:
+
+PREMISSA-A CODIGO CLIENTE:
+TODAS AS APIs RETORNAM O CODCIA DO CLIENTE, PORTANTO
+PARA DESCOBRIR O CODIGO-CLIENTE-CONTROL 9(08),
+VC DEVE FAZER BUSCA NA COLUNA VDCLICLI-CODCIA NA TABELA VDCLICLI
+E OBTER A COLUNA VDCLICLI-COD9.
+
+PREMISSA-B CODIGO PRODUTO:
+TODAS AS APIs RETORNAM O COD-EMBALAGEM DO PRODUTO, PORTANTO
+PARA DESCOBRIR O CODIGO-COMPOSTO-PRODUTO-CONTROL 9(06) OU
+CODIGO-REDUZIDO-CONTROL 9(10),
+VC DEVE FAZER BUSCA NA COLUNA VDPRDPRD-CODCMP (CAMPO-315 CAD.PRODUTOS)
+NA TABELA VDPRDPRD E OBTER A COLUNA VDPRDPRD-COD9 (CODIGO-COMPOSTO) OU
+COLUNA VDPRDPRD-CODR (CODIGO-REDUZIDO), CONFORME O DESTINO PEDIR.
+
+PREMISSA-C CODIGO FOTOGRAFIA:
+AS APIs RETORNAM O CODCIA DA FOTOGRAFIA, PORTANTO
+PARA DESCOBRIR O CODFSP-CONTROL 9(03),
+VC DEVE FAZER BUSCA NA COLUNA VDCLIFSP-CODCIA NA TABELA VDCLIFSP
+E OBTER A COLUNA VDCLIFSP-COD.
+
+PREMISSA-D CODIGO GRUPO-PARAMETRIZADO-PRODUTO:
+AS APIs RETORNAM O CODCIA DO GRUPO-PARAMETRIZADO-PRODUTO, PORTANTO
+PARA DESCOBRIR O GRPPAR-CONTROL 9(03),
+VC DEVE FAZER BUSCA NA COLUNA VDPRDGPA-CODCIA NA TABELA VDPRDGPA
+E OBTER A COLUNA VDPRDGPA-GRPPAR.
+
+
+
+1) SUGESTAO DE PEDIDO:
+
+PROGRAMA NO GESTAO VDCLPSPC.CBL
+ATUALIZA TABELA VDCLCVTE.VFE
+
+         FD  VDCLCVTE
+             LABEL RECORD IS STANDARD.
+         01  VDCLCVTE-REGISTRO.
+         03  VDCLCVTE-CHAVE.
+             05  VDCLCVTE-CODCLI         PIC 9(008).          VIDE PREMISSA-A.
+             05  FILLER REDEFINES VDCLCVTE-CODCLI.
+                 07  VDCLCVTE-REGI       PIC 9(004).
+                 07  VDCLCVTE-NUM        PIC 9(004).
+             05  VDCLCVTE-CODPRD         PIC 9(006).          VIDE PREMISSA-B (GRAVAR AQUI CODIGO-COMPOSTO-PRODUTO).
+             05  FILLER REDEFINES VDCLCVTE-CODPRD.
+                 07  VDCLCVTE-CFAM       PIC 9(003).
+                 07  VDCLCVTE-NRO        PIC 9(003).
+         03  VDCLCVTE-AUDIT.
+             05  VDCLCVTE-LOGDT          PIC 9(008).          COLOCAR AAAAMMDD DATA DE PROCESSAMENTO.
+             05  VDCLCVTE-INCLDT         PIC 9(008).          COLOCAR AAAAMMDD DATA DE PROCESSAMENTO.
+             05  VDCLCVTE-INCLHR         PIC 9(004).          COLOCAR HHMM DO PROCESSAMENTO.
+             05  VDCLCVTE-INCLSIGLA      PIC X(003).          COLOCAR FIXO "SAP".
+             05  VDCLCVTE-ALTEDT         PIC 9(008).          DEIXAR COM 0.
+             05  VDCLCVTE-ALTEHR         PIC 9(004).          DEIXAR COM 0.
+             05  VDCLCVTE-ALTESIGLA      PIC X(003).          DEIXAR COM ESPA€OS.
+             05  VDCLCVTE-CANCDT         PIC 9(008).          DEIXAR COM 0.
+             05  VDCLCVTE-CANCHR         PIC 9(004).          DEIXAR COM 0.
+             05  VDCLCVTE-CANCSIGLA      PIC X(003).          DEIXAR COM ESPA€OS.
+             05  VDCLCVTE-CANCSN         PIC 9.               COLOCAR FIXO 0.
+             05  VDCLCVTE-NIVELAUDIT     PIC 9(002).          DEIXAR COM 0.
+         03  VDCLCVTE-DADOS.
+             05  VDCLCVTE-CIA-QTDCX      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-CIA-QTDUN      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-CEV-QTDCX      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-CEV-QTDUN      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-HIS-QTDCX      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-HIS-QTDUN      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-VIS-QTDMES     PIC 9(002).          DEIXAR COM 0.
+             05  VDCLCVTE-VIS-QTD-REAL   PIC 9(002).          DEIXAR COM 0.
+             05  VDCLCVTE-VIS-QTD-ACUMP  PIC 9(002).          DEIXAR COM 0.
+             05  VDCLCVTE-SUG-QTDCX      PIC 9(007).          COLOCAR CAMPO "QTSUG" DA API "RFC: ZRFC_IDAS_CTRL_03".
+             05  VDCLCVTE-SUG-QTDUN      PIC 9(007).          DEIXAR COM 0.
+             05  VDCLCVTE-QTD-PEDIDOS    PIC 9(007).          DEIXAR COM 1.
+             05  VDCLCVTE-PROC-EXIG-ID   PIC 9(005).          COLOCAR FIXO 99999.
+             05  VDCLCVTE-QTD-DIAS-FAT   PIC 9(005).          DEIXAR COM 30.
+             05  VDCLCVTE-ORIGEM-PROD    PIC X(010).          COLOCAR CAMPO "ORGIN" DA API "RFC: ZRFC_IDAS_CTRL_03".
+             05  VDCLCVTE-ORIGEM-INFO    PIC X(001).          COLOCAR FIXO "S".
+         03  VDCLCVTE-FILLER             PIC X(032).
+      *----------------------------------------------------------------*
+      * ORIGEM-PROD  = INFORMACAO GRAVADA PELA API SFA-COKE SOLAR
+      * ORIGEM-INFO  = "C" OU ESPACO = GERADO PELO VDCLPSPC/CONTROL
+      *              = "S"           = GERADO PELA API SFA-COKE SOLAR
+      *----------------------------------------------------------------*
+
+
+
+
+
+2) INVENTARIO:
+
+COLETA SFA-CONTROL ATUALIZA TABELA VDPEDINV.VFE
+
+         FD  VDPEDINV
+             LABEL RECORD IS STANDARD.
+         01  VDPEDINV-REGISTRO.
+         03  VDPEDINV-CHAVE.
+              05  VDPEDINV-NREMP            PIC  9(003).      CODIGO DA EMPRESA-CONTROL
+              05  VDPEDINV-CODCLI           PIC  9(008).      VIDE PREMISSA-A
+              05  VDPEDINV-DIA              PIC  X(002).      COM BASE NO DATAPED ABAIXO, DESCOBRIR O DIA DA SEMANA E USAR DE/PARA A SEGUIR: 01-DOM 02-SEG 03-TER 04-QUA 05-QUI 06-SEX 07-SAB
+              05  VDPEDINV-CODVEN           PIC  X(003).      PEGAR VDCLICLI-VEN DO CLIENTE LOCALIZADO TABELA VDCLICLI.
+              05  VDPEDINV-SEQCRG           PIC  9(001).      FIXO 1.
+              05  VDPEDINV-DATAPED          PIC  9(008).      COLOCAR AAAAMMDD DATA DE PROCESSAMENTO
+              05  VDPEDINV-HORAPED          PIC  9(006).      DEIXAR COM 0.
+              05  VDPEDINV-CODR-PRODUTO     PIC  9(010).      VIDE PREMISSA-B (GRAVAR AQUI CODIGO-REDUZIDO-PRODUTO).
+         03   VDPEDINV-AUDIT.
+              05  VDPEDINV-LOGDT            PIC  9(008).      COLOCAR AAAAMMDD DATA DE PROCESSAMENTO.  
+              05  VDPEDINV-INCLDT           PIC  9(008).      COLOCAR AAAAMMDD DATA DE PROCESSAMENTO.  
+              05  VDPEDINV-INCLHR           PIC  9(004).      COLOCAR HHMM DO PROCESSAMENTO.           
+              05  VDPEDINV-INCLSIGLA        PIC  X(003).      COLOCAR FIXO "SAP".
+              05  VDPEDINV-ALTEDT           PIC  9(008).      DEIXAR COM 0.                            
+              05  VDPEDINV-ALTEHR           PIC  9(004).      DEIXAR COM 0.                            
+              05  VDPEDINV-ALTESIGLA        PIC  X(003).      DEIXAR COM ESPA€OS.                      
+              05  VDPEDINV-CANCDT           PIC  9(008).      DEIXAR COM 0.                            
+              05  VDPEDINV-CANCHR           PIC  9(004).      DEIXAR COM 0.                            
+              05  VDPEDINV-CANCSIGLA        PIC  X(003).      DEIXAR COM ESPA€OS.                      
+              05  VDPEDINV-CANCSN           PIC  9(001).      COLOCAR FIXO 0.                          
+              05  VDPEDINV-NIVELAUDIT       PIC  9(002).      DEIXAR COM 0.                            
+         03  VDPEDINV-DADOS.
+              05  VDPEDINV-DATACOLETA       PIC  9(008).      COLOCAR AAAAMMDD DATA DE PROCESSAMENTO
+              05  VDPEDINV-HORACOLETA       PIC  9(008).      DEIXAR COM 0.
+              05  VDPEDINV-PEDIDO           PIC  9(012).      DEIXAR COM 0.
+              05  VDPEDINV-HORI             PIC  9(014).      DEIXAR COM 0.
+              05  VDPEDINV-QTDE-CHEIO       PIC  9(007).      COLOCAR CAMPO "QTDEST" DA API "RFC: ZRFC_IDAS_CTRL_09".
+              05  VDPEDINV-QTDE-VAZIO       PIC  9(007).      DEIXAR COM 0.
+              05  VDPEDINV-HOUVE-DIVERGENCIA
+                                            PIC  9(001).      DEIXAR COM 0.
+              05  VDPEDINV-NOME-FOTO-PROD   PIC  X(120).      DEIXAR VAZIO.
+              05  VDPEDINV-NOME-FOTO-JUST   PIC  X(120).      DEIXAR VAZIO.
+              05  VDPEDINV-CODJUSTIFICATIVA PIC  X(006).      DEIXAR VAZIO.
+              05  VDPEDINV-OBSERVACAO       PIC  X(120).      DEIXAR VAZIO.
+              05  VDPEDINV-QTDE-SUG         PIC  9(007).      COLOCAR CAMPO "QTSUG" DA API "RFC: ZRFC_IDAS_CTRL_09".
+              05  VDPEDINV-QTDE-MAX-VALIDADOR
+                                            PIC  9(007).      DEIXAR COM 0.
+              05  VDPEDINV-QTDE-DIVERGENCIA PIC  9(007).      DEIXAR COM 0.
+              05  VDPEDINV-QTDE-SUG-CTG     PIC  9(007).      COLOCAR CAMPO "QTDSIN" DA API "RFC: ZRFC_IDAS_CTRL_09".
+              05  VDPEDINV-QTDE-SUG-LIM     PIC  9(007).      COLOCAR CAMPO "QTDSLC" DA API "RFC: ZRFC_IDAS_CTRL_09".
+              05  VDPEDINV-QTDE-VENDIDA     PIC  9(007).      COLOCAR CAMPO "QTDSFN" DA API "RFC: ZRFC_IDAS_CTRL_09".
+              05  VDPEDINV-TEVE-MOTNC       PIC  X(001).      COLOCAR FIXO "N"
+              05  VDPEDINV-COD-MOTNC        PIC  X(003).      DEIXAR VAZIO.
+              05  VDPEDINV-ORIGEM-INFO      PIC  X(001).      COLOCAR FIXO "S".
+              05  VDPEDINV-FILLER           PIC  X(103).
+      *................................................................*
+      * NREMP             : CODIGO DA EMPRESA.
+      * CODCLI            : CODIGO DO CLIENTE.
+      * DIA               : DIA DA SEMANA (VISITACAO).
+      * CODVEN            : CODIGO DO VENDEDOR.
+      * SEQCRG            : CARGA.
+      * DATAPED           : DATA DO PEDIDO NO COLETOR.
+      * HORAPED           : HORA DO PEDIDO NO COLETOR.
+      * CODR-PRODUTO      : CODIGO REDUZIDO DO PRODUTO.
+      *................................................................*
+      * DATACOLETA        : DATA SISTEMA DA COLETA.
+      * HORACOLETA        : HORA SISTEMA DA COLETA.
+      * PEDIDO            : PEDIDO DO CONTROL.
+      * HORI              : HORA ORIGINAL DO PEDIDO NO SFA.
+      * CODJUSTIFICATIVA  : CODIGO DA JUSTIFICATIVA.
+      * QTDE-SUG          : QTDE SUGERIDA NA SUGESTAO DO PEDIDO.
+      * QTDE-MAX-VALIDADOR: QTDE MAXIMA DO VALIDADO QUE FOI APLICADA.
+      * QTDE-DIVERGENCIA  : QTDE DIVERGENCIA NA CONTAGEM DE ESTOQUE.
+      * QTDE-SUG-CTG      : QTDE SUGERIDA DEPOIS DA APLICACAO DAS REGRAS
+      *                     DE CONTAGEM DE ESTOQUE.
+      * QTDE-SUG-LIM      : QTDE SUGERIDA DEPOIS DA APLICACAO DAS REGRAS
+      *                     DE LIMITE DE CREDITO.
+      * QTDE-VENDIDA      : QTDE VENDIDA EFETIVAMENTE.
+      *................................................................*
+      * TEVE-MOTNC        : TEVE MOTIVO DE NAO COMPRA: S=SIM
+      *                                                N ou ESPACO=NAO
+      * COD-MOTNC         : CODIGO DO MOTIVO DE NAO COMPRA.
+      *................................................................*
+      * ORIGEM-INFO       : "C" OU ESPACO = GERADO PELO VD11CC00/CONTROL
+      *                     "S"           = GERADO PELA API SFA-COKE SOLAR
+      *----------------------------------------------------------------*
+
+
+
+3) PARCERIA SINTETICO:
+
+LER TODOS OS REGISTROS DA TABELA VDCLIPRV.VFE (SINTETICO POR CLIENTE)
+A CADA CLIENTE VDCLIPRV-COD9 BUSCAR O CAMPO VDCLICLI-COD9 NA TABELA VDCLICLI
+E OBTER SEU CODCIA.
+
+A COLUNA QUE INFORMA SE O CLIENTE ESTA PARCEIRO SERA A COLUNA VDCLIPRV-PARCEIRO-G01.
+
+SE VDCLIPRV-PARCEIRO-G01 = 1 ENTAO ENVIAR "X", QUE A PARCEIRA FOI ATENDIDA.
+SE VDCLIPRV-PARCEIRO-G01 = 0 ENTAO ENVIAR VAZIO, QUE A PARCEIRA NAO FOI ATENDIDA.
+ 
+
+
+
+4) PARCERIA ANALITICO
+AQUI SERA LIDA A TABELA VDCLIIFP.VFE (ANALITICO POR CLIENTE X FOTOGRAFIA X GRUPO-PARAMETRIZAVEL-PRODUTO)
+
+A CADA REGISTRO, PEGAR O CLIENTE VDCLIIFP-CODCLI BUSCAR O CAMPO 
+VDCLICLI-COD9 NA TABELA VDCLICLI E OBTER SEU CODCIA.
+
+PEGAR A COLUNA VDCLIIFP-CODFSP (CODIGO-FOTOGRAFIA) E BUSCAR O MESMO CODIGO
+EM VDCLIFSP-COD (CODIGO-FOTOGRAFIA), PRECISA TER A MESMA LICENCA (VDCLIFSP-NUMLIC)
+E CODEMP (VDCLIFSP-CODEMP) RELACIONADO COM A REVENDA PROCESSADA.
+IREMOS USAR VDCLIFSP-CODCIA COMO CODIGO-FOTOGRAFIA PARA ENVIAR AO SAP.
+
+PEGAR A COLUNA VDCLIIFP-GRPPAR (GRUPO-PARAMETRIZADO-PRODUTO) E 
+BUSCAR O MESMO CODIGO EM VDPRDGPA-GRPPAR (GRUPO-PARAMETRIZADO-PRODUTO) E
+COM VDPRDGPA-CODPRD=0. IREMOS ENVIAR AQUI A VDPRDGPA-CODCIA COMO CODIGO-GRUPO-PARAMETRIZADO AO ENVIAR AO SAP).
+
+
+
+5) VISITAS DO VENDEDOR
+ATUALIZA TABELA VDCLISVI.VFE (AGENDA DE VISITAS PATHFIND)
+
+       FD  VDCLISVI
+           LABEL RECORD IS STANDARD.
+       01  VDCLISVI-REGISTRO.
+           03 VDCLISVI-CHAVE.
+              05 VDCLISVI-CODCLI          PIC 9(08).      VIDE PREMISSA-A.
+              05 FILLER REDEFINES VDCLISVI-CODCLI.
+                 07 VDCLISVI-REGI         PIC 9(04).
+                 07 VDCLISVI-NUM          PIC 9(04).
+              05 VDCLISVI-DTVISITA        PIC 9(08).      COLOCAR CAMPO "EXDAT" DA API "RFC: ZRFC_IDAS_CTRL_10".
+              05 FILLER REDEFINES VDCLISVI-DTVISITA.
+                 07 VDCLISVI-ANOVISITA    PIC 9(04).
+                 07 VDCLISVI-MESVISITA    PIC 9(02).
+                 07 VDCLISVI-DIAVISITA    PIC 9(02).
+              05 VDCLISVI-SEQVISITA       PIC 9(03).      COLOCAR CAMPO "SEQU" DA API "RFC: ZRFC_IDAS_CTRL_10".
+           03 VDCLISVI-AUDIT.
+              05 VDCLISVI-LOGDT           PIC 9(08).      COLOCAR AAAAMMDD DATA DE PROCESSAMENTO. 
+              05 VDCLISVI-INCLDT          PIC 9(08).      COLOCAR AAAAMMDD DATA DE PROCESSAMENTO. 
+              05 VDCLISVI-INCLHR          PIC 9(04).      COLOCAR HHMM DO PROCESSAMENTO.          
+              05 VDCLISVI-INCLSIGLA       PIC X(03).      COLOCAR FIXO "SAP".
+              05 VDCLISVI-ALTEDT          PIC 9(08).      DEIXAR COM 0.                           
+              05 VDCLISVI-ALTEHR          PIC 9(04).      DEIXAR COM 0.                           
+              05 VDCLISVI-ALTESIGLA       PIC X(03).      DEIXAR COM ESPA€OS.                     
+              05 VDCLISVI-CANCDT          PIC 9(08).      DEIXAR COM 0.                           
+              05 VDCLISVI-CANCHR          PIC 9(04).      DEIXAR COM 0.                           
+              05 VDCLISVI-CANCSIGLA       PIC X(03).      DEIXAR COM ESPA€OS.                     
+              05 VDCLISVI-CANCSN          PIC 9(01).      COLOCAR FIXO 0.                         
+              05 VDCLISVI-NIVELAUDIT      PIC 9(02).      DEIXAR COM 0.                           
+           03 VDCLISVI-DADOS.
+              05 VDCLISVI-CODVEN          PIC X(03).      COLOCAR VDCLICLI-VEN (PRIMEIRO VENDEDOR DO CADASTRO DE CLIENTES LIDO ANTERIORMENTE).
+              05 VDCLISVI-HORAVISITA-INI  PIC 9(04).      DEIXAR COM 0.
+              05 VDCLISVI-HORAVISITA-FIM  PIC 9(04).      DEIXAR COM 0.
+              05 VDCLISVI-DURAVISITA      PIC 9(04).      DEIXAR COM 0.
+              05 VDCLISVI-PROG-ORIGEM     PIC X(08).      COLOCAR FIXO "SAP".
+              05 VDCLISVI-FILLER          PIC X(82).
+
+
+
+
+
+==========================================================================
+
+TABELAS AUXILIARES:
+
+
+VDCLIFSP (TABELA DE FOTOGRAFIA)   VDCLIFSP.EFDE-NOVA
+
+         FD  VDCLIFSP
+             LABEL RECORD IS STANDARD.
+         01  VDCLIFSP-REGISTRO.
+         03  VDCLIFSP-CHAVE.
+             05  VDCLIFSP-NUMLIC            PIC  9(004).
+             05  VDCLIFSP-CODEMP            PIC  9(003).
+             05  VDCLIFSP-COD               PIC  9(003).
+         03  VDCLIFSP-AUDIT.
+             05  VDCLIFSP-LOGDT             PIC  9(008).
+             05  VDCLIFSP-INCLDT            PIC  9(008).
+             05  VDCLIFSP-INCLHR            PIC  9(004).
+             05  VDCLIFSP-INCLUSER          PIC  X(003).
+             05  VDCLIFSP-ALTEDT            PIC  9(008).
+             05  VDCLIFSP-ALTEHR            PIC  9(004).
+             05  VDCLIFSP-ALTEUSER          PIC  X(003).
+             05  VDCLIFSP-CANCDT            PIC  9(008).
+             05  VDCLIFSP-CANCHR            PIC  9(004).
+             05  VDCLIFSP-CANCUSER          PIC  X(003).
+             05  VDCLIFSP-CANCSN            PIC  9(001).
+             05  VDCLIFSP-NIVELAUDIT        PIC  9(002).
+         03  VDCLIFSP-DADOS.
+             05  VDCLIFSP-DESCRICAO         PIC  X(050).
+             05  VDCLIFSP-DESCR-RED         PIC  X(015).
+             05  VDCLIFSP-DTINI-ATU         PIC  9(008).
+             05  FILLER REDEFINES VDCLIFSP-DTINI-ATU.
+                  07  VDCLIFSP-ANO-INI-ATU  PIC  9(004).
+                  07  VDCLIFSP-MES-INI-ATU  PIC  9(002).
+                  07  VDCLIFSP-DIA-INI-ATU  PIC  9(002).
+             05  VDCLIFSP-DTFIM-ATU         PIC  9(008).
+             05  FILLER REDEFINES VDCLIFSP-DTFIM-ATU.
+                  07  VDCLIFSP-ANO-FIM-ATU  PIC  9(004).
+                  07  VDCLIFSP-MES-FIM-ATU  PIC  9(002).
+                  07  VDCLIFSP-DIA-FIM-ATU  PIC  9(002).
+             05  VDCLIFSP-CANAL             PIC  X(002).
+             05  VDCLIFSP-LIVRE             PIC  X(002).
+             05  VDCLIFSP-CODREGIAO         PIC  9(004).
+             05  VDCLIFSP-CODGER            PIC  X(003).
+             05  VDCLIFSP-CODSUP            PIC  X(003).
+             05  VDCLIFSP-CODVEN            PIC  X(003).
+             05  VDCLIFSP-CODECO            PIC  X(001).
+             05  VDCLIFSP-POTFIN            PIC  X(001).
+             05  VDCLIFSP-GRPGER            PIC  9(002).
+             05  VDCLIFSP-CODEXI            PIC  9(003).
+             05  VDCLIFSP-PERIODO-DIAS      PIC  9(003).
+             05  VDCLIFSP-SUBCANAL          PIC  9(003).
+             05  VDCLIFSP-PRIORIDADE        PIC  9(005).
+             05  VDCLIFSP-CODCIA            PIC  X(010).
+         03  VDCLIFSP-FILLER                PIC  X(129).
+      *----------------------------------------------------------------*
+      * NUMLIC       = NUMERO DA LICENCA
+      * CODEMP       = CODIGO DA EMPRESA
+      * COD          = CODIGO DA FOTOGRAFIA DE SUCESSO PADRAO
+      *----------------------------------------------------------------*
+      * DTINI        = DATA DE INICIO DA VALIDADE
+      * DTFIM        = DATA DE TERMINO DA VALIDADE
+      * CANAL        = CODIGO DO CANAL DE VENDAS
+      * SUBCANAL     = CODIGO DO SUB-CANAL
+      * (ATENCAO: O USUARIO SOMENTE PODE ESCOLHER CANAL OU SUBCANAL,
+      *  NUNCA AMBOS NO MESMO REGISTRO)
+      * CODREGIAO    = CODIGO DA REGIAO DE CLIENTES
+      * CODGER       = CODIGO DO GERENTE
+      * CODSUP       = CODIGO DO SUPERVISOR
+      * CODVEN       = CODIGO DO VENDEDOR
+      * CODECO       = CODIGO DA CLASSE ECONOMICA
+      * POTFIN       = POTENCIAL FINAL (A OU B)
+      * GRPGER       = CODIGO DO GRUPO GERENCIAL (1-FEMSA OU 2-CCIL)
+      * CODEXI       = CODIGO DA EXIGENCIA
+      * PRIORIDADE   = NUMERO DE PRIORIDADE
+      * CODCIA       = CODIGO-CIA
+      *----------------------------------------------------------------*
+      * CAMPOS OBRIGATORIOS:
+      * NUMLIC, CODEMP, COD, DESCRICAO, DESCR-RED, DTINI, DTFIM, 
+      * CODECO, POTFIN, GRPGER E CODEXI.
+      *----------------------------------------------------------------*
+
+
+TABELA ANALITICA CLIENTE X FSP X GRPPAR
+
+         FD  VDCLIIFP
+             LABEL RECORD IS STANDARD.
+         01  VDCLIIFP-REGISTRO.
+         03  VDCLIIFP-CHAVE.
+             05  VDCLIIFP-CODCLI            PIC  9(008).      VIDE PREMISSA-A.
+             05  FILLER REDEFINES VDCLIIFP-CODCLI.
+                  07  VDCLIIFP-REGI         PIC  9(004).
+                  07  VDCLIIFP-NUM          PIC  9(004).
+             05  VDCLIIFP-CODFSP            PIC  9(003).      VIDE PREMISSA-C.
+             05  VDCLIIFP-GRPPAR            PIC  9(003).      VIDE PREMISSA-D.
+         03  VDCLIIFP-AUDIT.
+             05  VDCLIIFP-LOGDT             PIC  9(008).  
+             05  VDCLIIFP-INCLDT            PIC  9(008).  
+             05  VDCLIIFP-INCLHR            PIC  9(004).           
+             05  VDCLIIFP-INCLUSER          PIC  X(003).
+             05  VDCLIIFP-ALTEDT            PIC  9(008).                            
+             05  VDCLIIFP-ALTEHR            PIC  9(004).                            
+             05  VDCLIIFP-ALTEUSER          PIC  X(003).                      
+             05  VDCLIIFP-CANCDT            PIC  9(008).                            
+             05  VDCLIIFP-CANCHR            PIC  9(004).                            
+             05  VDCLIIFP-CANCUSER          PIC  X(003).                      
+             05  VDCLIIFP-CANCSN            PIC  9.                               
+             05  VDCLIIFP-NIVELAUDIT        PIC  9(002).                            
+         03  VDCLIIFP-DADOS.
+             05  VDCLIIFP-SIT               PIC  9(001).
+             05  VDCLIIFP-DTULTCOMPRA       PIC  9(008).
+             05  VDCLIIFP-POLARIZADO        PIC  X(001).
+201020       05  VDCLIIFP-NUMDIAS           PIC  9(003).
+260121       05  VDCLIIFP-NUMDIAS-PERDE     PIC  9(005).
+         03  VDCLIIFP-FILLER                PIC  X(091).
+      *----------------------------------------------------------------*
+      * CODCLI       = CODIGO DO CLIENTE
+      * CODFSP       = CODIGO DA FOTOGRAFIA DE SUCESSO PADRAO
+      * GRPPAR       = CODIGO DO GRUPO PRODUTO PARAMETRIZAVEL
+      *----------------------------------------------------------------*
+      * SIT          = SITUACAO DESSE GRUPO PRODUTO PARAMETRIZAVEL
+      *                0-GRPPAR NAO ATENDIDO
+      *                1-GRPPAR ATENDIDO
+      * DTULTCOMPRA  = DATA ULTIMA COMPRA DE ALGUM PRODUTO DESSE GRPPAR
+      *----------------------------------------------------------------*
+      * POLARIZADO   = PODENDO SER:
+      *                S-SIM, POLARIZADO
+      *                N-NAO, NAO POLARIZADO
+      *                BRANCO-NAO SE APLICA A POLARIZACAO
+      *----------------------------------------------------------------*
+      * NUMDIAS      = NUMERO DE DIAS (CALCULO FOTOGRAFIAS)
+      *----------------------------------------------------------------*
+      * NUMDIAS-PERDE= NUMERO DE DIAS PARA CLIENTE PERDER A PARCERIA
+      *----------------------------------------------------------------*

@@ -1,0 +1,11 @@
+CALL SP_SOL_PEDIDO_SUGERIDO('WXYZ',
+                            NULL,
+                            NULL,
+                            NULL,                                                    
+			    '555',				                   
+		            '3',
+		            NULL,
+			    13.333,
+			    NULL,
+			    ?,
+			    ?);
