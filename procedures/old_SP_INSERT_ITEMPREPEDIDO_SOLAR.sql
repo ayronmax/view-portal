@@ -1,8 +1,8 @@
-CREATE OR REPLACE PROCEDURE SP_INSERT_ITEMPREPEDIDO (IN COD_NEMP SMALLINT,
-IN COD_PRE_PEDIDO BIGINT,
+CREATE OR REPLACE PROCEDURE SP_INSERT_ITEMPREPEDIDO_SOLAR (IN COD_NEMP SMALLINT,
+                                            IN COD_PRE_PEDIDO BIGINT,
 IN SEQ_ITEM SMALLINT,
-IN COD_OCORRENCIA SMALLINT,
-IN COD_RED VARCHAR(10),
+IN COD_OCORRENCIA CHAR(4),
+IN COD_RED BIGINT,
 IN QUANTIDADE_CX INTEGER,
 IN QUANTIDADE_UN INTEGER,
 IN TABLEPRECO INTEGER,
@@ -34,13 +34,13 @@ in valorVerbaUtilizadaGL  DECIMAL(11,2),
 in codigoVerbaGeradaGL  SMALLINT,        
 in itemValidadoBonificaoAutomatica     CHAR(001),       
 in horaInicialPedido              bigint,
-in ultimo_item                    CHAR(001),
-IN PRECO_NEGOCIADO SMALLINT,                                                                                        
-IN VALOR_LIQ_UMA_CAIXA DECIMAL(11,4),
-IN VALOR_LIQ_UM_AVULSO DECIMAL(11,4),
-IN VALOR_LIQ_FINAL DECIMAL(9,2),
-IN VALOR_ACRESCIMO_CAPA DECIMAL(7,2),
-IN VALOR_DESCONTO_CAPA DECIMAL(7,2),
+                                                                                        in ultimo_item                    CHAR(001),
+                                                                                        IN PRECO_NEGOCIADO SMALLINT,                                                                                        
+                                                                                        IN VALOR_LIQ_UMA_CAIXA DECIMAL(11,4),
+                                                                                        IN VALOR_LIQ_UM_AVULSO DECIMAL(11,4),
+                                                                                        IN VALOR_LIQ_FINAL DECIMAL(9,2),
+                                                                                        IN VALOR_ACRESCIMO_CAPA DECIMAL(7,2),
+                                                                                        IN VALOR_DESCONTO_CAPA DECIMAL(7,2),
 in aliq_pvv DECIMAL (4,2),
 in QUANTIDADE_NA_CX INTEGER,
 OUT STATUSMSG       SMALLINT,
@@ -62,15 +62,38 @@ BEGIN
    
    declare PREPRDUS DECIMAL(9,4);
    
+   declare CodOcoInt SMALLINT;
+   
    declare CodReduzido BIGINT;
+  
+   if COD_OCORRENCIA = 'Z100' or COD_OCORRENCIA = 'Z101' or COD_OCORRENCIA = 'Z102' then -- VENDA
+      set CodOcoInt = select vdparoco_oco_digped from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z103' or COD_OCORRENCIA = 'Z104' then -- BONIFICACAO
+      set CodOcoInt = select vdparoco_ocbon1 from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z105' or COD_OCORRENCIA = 'Z106' or COD_OCORRENCIA = 'Z109' or COD_OCORRENCIA = 'Z110' then -- TROCA
+      set CodOcoInt = select vdparoco_octca1 from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z117' then -- COMODATO 
+      set CodOcoInt = select vdparoco_occevsai from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z122' then -- VENDA REPASSE COMBO ???
+      set CodOcoInt = select vdparoco_oco_digped from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z102' then -- COMBO, NAO SERIA Z202 ???
+      set CodOcoInt = select vdparoco_oco_digped from paroco01 where vdparoco_codemp = COD_NEMP;        
+   elseif COD_OCORRENCIA = 'Z203' or COD_OCORRENCIA = 'Z204' then -- BONIFICACAO COMBO ???
+      set CodOcoInt = select vdparoco_ocbon1 from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z235' or COD_OCORRENCIA = 'Z236' then -- BONIFICACAO COMBO RIBA ???
+      set CodOcoInt = select vdparoco_ocbon1 from paroco01 where vdparoco_codemp = COD_NEMP;
+   elseif COD_OCORRENCIA = 'Z182' then -- BONIFICACAO PROMOCIONAL ???
+      set CodOcoInt = select vdparoco_ocbon1 from paroco01 where vdparoco_codemp = COD_NEMP;
+   end if;
    
-   set CodReduzido = select VDPRDPRD_CODR FROM CADPRD06 where VDPRDPRD_CODCMP = COD_RED AND VDPRDPRD_FLAG = 'A';;
+   set CodReduzido = select VDPRDPRD_CODR FROM CADPRD01 where TRIM(VDPRDPRD_CODCMP) = CAST (COD_RED as varchar(10));   
+
    
-   set QTD_CX = select VDPRDPRD_QTDUN FROM CADPRD06 where VDPRDPRD_CODR  = CodReduzido;
+   set QTD_CX = select VDPRDPRD_QTDUN FROM CADPRD01 where VDPRDPRD_CODR = CodReduzido;
    
    set codprd = select cast(concat(repeat('0',3 - length(cast(VDPRDPRD_CFAM as varchar(3)))),cast(VDPRDPRD_CFAM as varchar(3)))||
        concat(repeat('0',3 - length(cast(VDPRDPRD_NRO as varchar(3)))), cast(VDPRDPRD_NRO as varchar(3))) as int)
-       from cadprd06 where VDPRDPRD_CODR = CodReduzido;
+       from cadprd01 where VDPRDPRD_CODR = CodReduzido;
    
     SET ITEM = SELECT VDPEDIPP_PRE_PED FROM VDPEDIPP WHERE VDPEDIPP_PRE_PED = COD_PRE_PEDIDO AND VDPEDIPP_NREMP = COD_NEMP AND VDPEDIPP_ITEM = SEQ_ITEM;
    
@@ -126,8 +149,8 @@ VALUES (
 COD_NEMP                         ,
 COD_PRE_PEDIDO                   ,
 SEQ_ITEM                         ,
-COD_OCORRENCIA                   ,
-CodReduzido                      ,
+CodOcoInt,
+CodReduzido                       ,
 codprd                           ,
 QUANTIDADE_CX                    ,
 QUANTIDADE_UN                    ,
@@ -215,7 +238,7 @@ VALUES (
 COD_NEMP          ,
 COD_PRE_PEDIDO    ,
 SEQ_ITEM          ,
-COD_OCORRENCIA    ,
+CodOcoInt,
 CodReduzido       ,
 codprd            ,
 QUANTIDADE_CX     ,

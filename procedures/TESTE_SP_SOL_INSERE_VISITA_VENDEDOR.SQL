@@ -1,0 +1,12 @@
+CALL SP_SOL_INSERE_VISITA_VENDEDOR(NULL,
+                                   '55534',
+                                   NULL,
+                                   NULL,
+                                   NULL,
+                                   1234,
+                                   '2021-02-10',
+                                   NULL,
+                                   NULL,
+                                   NULL,
+			           ?,
+			           ?);
