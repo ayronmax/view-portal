@@ -1,0 +1,18 @@
+CALL INSERE_VDPRDPPR(
+123,
+'asdf',
+123,
+'asd',
+'as',
+123,
+123,
+'asdf',
+'asdf',
+123,
+'asdf',
+'asd',
+'asdf',
+'123',
+123,
+?,
+?)

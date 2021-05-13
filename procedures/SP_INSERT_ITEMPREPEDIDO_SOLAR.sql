@@ -64,7 +64,7 @@ BEGIN
    
    declare CodReduzido BIGINT;
    
-   set CodReduzido = select VDPRDPRD_CODR FROM CADPRD06 where VDPRDPRD_CODCMP = COD_RED AND VDPRDPRD_FLAG = 'A';;
+   set CodReduzido = select VDPRDPRD_CODR FROM CADPRD06 where VDPRDPRD_CODCMP = COD_RED AND VDPRDPRD_FLAG = 'A';
    
    set QTD_CX = select VDPRDPRD_QTDUN FROM CADPRD06 where VDPRDPRD_CODR  = CodReduzido;
    
