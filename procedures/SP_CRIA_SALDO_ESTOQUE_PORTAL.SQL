@@ -10,12 +10,12 @@ BEGIN
   DECLARE dataEstoque DATE;
   DECLARE strDataEstoque VARCHAR(10);
   DECLARE strUser VARCHAR(20);
-  DECLARE strSql VARCHAR(1000);
-  DECLARE strTableName VARCHAR(20);
+  DECLARE strSql VARCHAR(5000);
+  DECLARE strTableName VARCHAR(30);
   DECLARE intAno SMALLINT;
   DECLARE intMes SMALLINT;
   DECLARE intDia SMALLINT;
-  DECLARE strNomeTabela VARCHAR(20);
+  DECLARE strNomeTabela VARCHAR(30);
   DECLARE intProduto INTEGER;
   DECLARE intDiaSaldo SMALLINT;
   DECLARE decInicial DECIMAL(11,0);
@@ -26,10 +26,12 @@ BEGIN
   DECLARE intFam SMALLINT;
   DECLARE intNro SMALLINT;
   DECLARE decCodR DECIMAL(10,0);
-  DECLARE intQtdUn SMALLINT;
+  DECLARE intUn SMALLINT;
+  DECLARE intQtdUn INTEGER;
   DECLARE intProdutoFam SMALLINT;
   DECLARE intProdutoNro SMALLINT;
-  DECLARE strCodBar VARCHAR(18);
+  DECLARE strCodBarCX VARCHAR(30);
+  DECLARE strCodBarUN VARCHAR(30);
   
   SET strUser = SELECT TRIM(CURRENT_USER);
     
@@ -37,6 +39,7 @@ BEGIN
   
   PREPARE stmt FROM strSql;
   EXECUTE stmt INTO intNumEmp;
+  DEALLOCATE PREPARE stmt;  
   
   IF intNumEmp IS NULL THEN
      SET intNumEmp = 1;
@@ -44,18 +47,15 @@ BEGIN
   
   SET strNumEmp = REPEAT('0', 2 - LENGTH(CAST(intNumEmp AS VARCHAR(2)))) || CAST(intNumEmp AS VARCHAR(2));
   
-  DEALLOCATE PREPARE stmt;  
-  
   SET strSql = 'SELECT VDPAROC2_DATA_ESTOQUE_FECHA FROM ' || strUser || '.PAROC206';
   
   PREPARE stmt1 FROM strSql;
   EXECUTE stmt1 INTO intDataEstoque;
+  DEALLOCATE PREPARE stmt1;
   
   IF intDataEstoque IS NULL THEN
      SET intDataEstoque = 0;
   END IF;
-      
-  DEALLOCATE PREPARE stmt1;
   
   SET strDataEstoque = LEFT(CAST(intDataEstoque AS VARCHAR(8)), 4) || '-' || SUBSTRING(CAST(intDataEstoque AS VARCHAR(8)), 5, 2) || '-' || RIGHT(CAST(intDataEstoque AS VARCHAR(8)), 2);
   SET dataAtual = CURDATE();  
@@ -67,16 +67,15 @@ BEGIN
   
   PREPARE stmt2 FROM strSql;
   EXECUTE stmt2 INTO strTableName;
+  DEALLOCATE PREPARE stmt2;
    
   IF strTableName IS NULL THEN
-     SET strSql = 'CREATE TABLE ' || strUser || '.SALDO_ESTOQUE_PORTAL (NUMERO_EMP SMALLINT, DATA_ESTOQUE DATE, PRODUTO_FAM SMALLINT, PRODUTO_NRO SMALLINT, PRODUTO_REDUZ DECIMAL(10,0), PRODUTO_CODBAR VARCHAR(18), PRODUTO_QTDUN SMALLINT, SALDO DECIMAL(13,2), SALDO_UNID DECIMAL(11,0), PRIMARY KEY (NUMERO_EMP, DATA_ESTOQUE, PRODUTO_FAM, PRODUTO_NRO))';
+     SET strSql = 'CREATE TABLE ' || strUser || '.SALDO_ESTOQUE_PORTAL (NUMERO_EMP SMALLINT, DATA_ESTOQUE DATE, PRODUTO_FAM SMALLINT, PRODUTO_NRO SMALLINT, PRODUTO_REDUZ DECIMAL(10,0), PRODUTO_CODBAR_CX VARCHAR(30), PRODUTO_CODBAR_UN VARCHAR(30), PRODUTO_UN SMALLINT, PRODUTO_QTDUN INTEGER, SALDO DECIMAL(13,2), SALDO_UNID DECIMAL(11,0), SALDO_CX INTEGER, SALDO_AV INTEGER, PRIMARY KEY (NUMERO_EMP, DATA_ESTOQUE, PRODUTO_FAM, PRODUTO_NRO))';
      EXECUTE IMMEDIATE strSql;
   ELSE
      SET strSql = 'DELETE FROM ' || strUser || '.SALDO_ESTOQUE_PORTAL';
      EXECUTE IMMEDIATE strSql;   
   END IF;
-    
-  DEALLOCATE PREPARE stmt2;
   
   SET intAno = YEAR(dataAtual);
   SET intMes = MONTH(dataAtual);
@@ -99,7 +98,7 @@ BEGIN
      
      PREPARE stmt4 FROM strSql;
      DECLARE cursor1 CURSOR FOR stmt4;
-     OPEN cursor1 USING strDiaEstoque;         
+     OPEN cursor1 USING strDiaEstoque;
      FETCH cursor1 INTO intProduto, intDiaSaldo, decInicial, decEntradas, decSaidas;
      
      IF intProduto IS NOT NULL THEN
@@ -107,39 +106,73 @@ BEGIN
           SET intProdutoFam = Cast(left(concat(repeat('0',6-length(cast(intProduto AS varchar(6)))),cast(intProduto as varchar(6))),3) AS SMALLINT);
           SET intProdutoNro = Cast(right(concat(repeat('0',6-length(cast(intProduto as varchar(6)))),cast(intProduto as varchar(6))),3) AS SMALLINT);
        
-          SET strSql = 'SELECT VDPRDPRD_CFAM, VDPRDPRD_NRO, VDPRDPRD_CODR, VDPRDPRD_QTDUN FROM ' || strUser || '.CADPRD06';
+          SET strSql = 'SELECT VDPRDPRD_CFAM, VDPRDPRD_NRO, VDPRDPRD_CODR, VDPRDPRD_UNID, VDPRDPRD_QTDUN FROM ' || strUser || '.CADPRD06';
           SET strSql = strSql || ' WHERE VDPRDPRD_CFAM = ?';
           SET strSql = strSql || ' AND VDPRDPRD_NRO = ?';
         
           PREPARE stmt5 FROM strSql;
-          EXECUTE stmt5 INTO intFam, intNro, decCodR, intQtdUn USING intProdutoFam, intProdutoNro;
+          EXECUTE stmt5 INTO intFam, intNro, decCodR, intUn, intQtdUn USING intProdutoFam, intProdutoNro;
+          DEALLOCATE PREPARE stmt5;
        
           IF intFam IS NOT NULL THEN
-             SET strSql = 'SELECT VDPRDBAR_CODBAR FROM ' || strUser || '.VDPRBA06';
+             SET strSql = 'SELECT TRIM(VDPRDBAR_CODBAR) FROM ' || strUser || '.VDPRBA06';
              SET strSql = strSql || ' WHERE VDPRDBAR_CODPRD = ? AND VDPRDBAR_UNIDADE = 1';
-       
+             
              PREPARE stmt6 FROM strSql;
-             EXECUTE stmt6 INTO strCodBar USING intProduto;
+             EXECUTE stmt6 INTO strCodBarCX USING intProduto;
+             DEALLOCATE PREPARE stmt6;
+             
+             SET strSql = 'SELECT TRIM(VDPRDBAR_CODBAR) FROM ' || strUser || '.VDPRBA06';
+             SET strSql = strSql || ' WHERE VDPRDBAR_CODPRD = ? AND VDPRDBAR_UNIDADE = 2';
        
-             IF strCodBar IS NOT NULL THEN
-                SET strSql = 'INSERT INTO ' || strUser || '.SALDO_ESTOQUE_PORTAL (NUMERO_EMP, DATA_ESTOQUE, PRODUTO_FAM, PRODUTO_NRO, PRODUTO_REDUZ, PRODUTO_CODBAR, PRODUTO_QTDUN, SALDO, SALDO_UNID)';
+             PREPARE stmt7 FROM strSql;
+             EXECUTE stmt7 INTO strCodBarUN USING intProduto;
+             DEALLOCATE PREPARE stmt7;
+             
+             IF strCodBarCX IS NULL THEN
+                SET strCodBarCX = '';
+             END IF;
+                
+             IF strCodBarUN IS NULL THEN
+                SET strCodBarUN = '';
+             END IF;     
+       
+             IF strCodBarCX <> '' THEN
+                SET strSql = 'INSERT OR REPLACE INTO ' || strUser || '.SALDO_ESTOQUE_PORTAL (NUMERO_EMP, DATA_ESTOQUE, PRODUTO_FAM, PRODUTO_NRO, PRODUTO_REDUZ, PRODUTO_CODBAR_CX, PRODUTO_CODBAR_UN, PRODUTO_UN, PRODUTO_QTDUN, SALDO, SALDO_UNID, SALDO_CX, SALDO_AV)';
                 SET strSql = strSql || ' VALUES (' || strNumEmp || ',';
                 SET strSql = strSql || '''' || strDataEstoque || '''' || ',';             
                 SET strSql = strSql || CAST(intFam AS VARCHAR(3)) || ',';
                 SET strSql = strSql || CAST(intNro AS VARCHAR(3)) || ',';
                 SET strSql = strSql || CAST(decCodR AS VARCHAR(20)) || ',';
-                SET strSql = strSql || '''' || strCodBar || '''' || ',';
-                SET strSql = strSql || CAST(intQtdUn AS VARCHAR(4)) || ',';
+                SET strSql = strSql || '''' || strCodBarCX || '''' || ',';
+                SET strSql = strSql || '''' || strCodBarUN || '''' || ',';
+                SET strSql = strSql || CAST(intUn AS VARCHAR(4)) || ',';
+                SET strSql = strSql || CAST(intQtdUn AS VARCHAR(9)) || ',';
                 SET strSql = strSql || CAST(CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3)) AS VARCHAR(20)) || ',';
-                SET strSql = strSql || CAST(decInicial + decEntradas - decSaidas AS VARCHAR(20)) || ')';
+                SET strSql = strSql || CAST(decInicial + decEntradas - decSaidas AS VARCHAR(20)) || ',';
+                SET strSql = strSql || CAST(FIX(CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3))) AS VARCHAR(20)) || ',';
+                SET strSql = strSql || CAST(RND((CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3)) - FIX(CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3)))) * intQtdUn) AS VARCHAR(20)) || ')';
                 EXECUTE IMMEDIATE strSql;
              END IF;
-          
-             DEALLOCATE PREPARE stmt6;
-          
+             
+             IF strCodBarUN <> '' THEN
+                SET strSql = 'INSERT OR REPLACE INTO ' || strUser || '.SALDO_ESTOQUE_PORTAL (NUMERO_EMP, DATA_ESTOQUE, PRODUTO_FAM, PRODUTO_NRO, PRODUTO_REDUZ, PRODUTO_CODBAR_CX, PRODUTO_CODBAR_UN, PRODUTO_UN, PRODUTO_QTDUN, SALDO, SALDO_UNID, SALDO_CX, SALDO_AV)';
+                SET strSql = strSql || ' VALUES (' || strNumEmp || ',';
+                SET strSql = strSql || '''' || strDataEstoque || '''' || ',';             
+                SET strSql = strSql || CAST(intFam AS VARCHAR(3)) || ',';
+                SET strSql = strSql || CAST(intNro AS VARCHAR(3)) || ',';
+                SET strSql = strSql || CAST(decCodR AS VARCHAR(20)) || ',';
+                SET strSql = strSql || '''' || strCodBarCX || '''' || ',';
+                SET strSql = strSql || '''' || strCodBarUN || '''' || ',';
+                SET strSql = strSql || CAST(intUn AS VARCHAR(4)) || ',';
+                SET strSql = strSql || CAST(intQtdUn AS VARCHAR(9)) || ',';
+                SET strSql = strSql || CAST(CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3)) AS VARCHAR(20)) || ',';
+                SET strSql = strSql || CAST(decInicial + decEntradas - decSaidas AS VARCHAR(20)) || ',';
+                SET strSql = strSql || CAST(FIX(CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3))) AS VARCHAR(20)) || ',';
+                SET strSql = strSql || CAST(RND((CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3)) - FIX(CAST((decInicial + decEntradas - decSaidas) / intQtdUn AS DECIMAL(13,3)))) * intQtdUn) AS VARCHAR(20)) || ')';
+                EXECUTE IMMEDIATE strSql;
+             END IF;
           END IF;
-       
-          DEALLOCATE PREPARE stmt5;
        
           FETCH NEXT FROM cursor1 INTO intProduto, intDiaSaldo, decInicial, decEntradas, decSaidas;  
         END WHILE;
