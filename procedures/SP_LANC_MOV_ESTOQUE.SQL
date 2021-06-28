@@ -1,5 +1,7 @@
-CREATE OR REPLACE PROCEDURE SP_CRIA_SALDO_ESTOQUE_PORTAL(OUT COD_ERRO SMALLINT,
-                                                         OUT MSG_ERRO VARCHAR(100))
+CREATE OR REPLACE PROCEDURE SP_LANC_MOV_ESTOQUE(IN PRODUTO VARCHAR(10),
+                                                IN QTD INTEGER,
+                                                OUT COD_ERRO SMALLINT,
+                                                OUT MSG_ERRO VARCHAR(100))
 
 LANGUAGE SQL
 
@@ -52,10 +54,18 @@ BEGIN
   PREPARE stmt1 FROM strSql;
   EXECUTE stmt1 INTO intDataEstoque;
   DEALLOCATE PREPARE stmt1;
-  
+   
   IF intDataEstoque IS NULL THEN
      SET intDataEstoque = 0;
   END IF;
+  
+  SET strSql = 'SELECT VDKARNRO_PAROC2_DATA_ESTOQUE_FECHA FROM ' || strUser || '.PAROC206';
+  
+  PREPARE stmt1 FROM strSql;
+  EXECUTE stmt1 INTO intDataEstoque;
+  DEALLOCATE PREPARE stmt1;
+  
+  
   
   SET strDataEstoque = LEFT(CAST(intDataEstoque AS VARCHAR(8)), 4) || '-' || SUBSTRING(CAST(intDataEstoque AS VARCHAR(8)), 5, 2) || '-' || RIGHT(CAST(intDataEstoque AS VARCHAR(8)), 2);
   SET dataAtual = CURDATE();  
