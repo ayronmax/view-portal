@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE SP_LANC_MOV_ESTOQUE(IN CODIGO_PRODUTO VARCHAR(20),
+CREATE OR REPLACE PROCEDURE SP_LANC_MOV_ESTOQUE(IN CODIGO_PRODUTO INTEGER,
                                                 IN SAIDAS INTEGER,
                                                 IN ENTRADAS INTEGER,
                                                 IN CODIGO_ORDEM_PRODUTO INTEGER,
@@ -41,7 +41,7 @@ BEGIN
   EXECUTE IMMEDIATE strSql;
       
   SET strSql = 'SELECT VDPRDPRD_CFAM, VDPRDPRD_NRO FROM ' || strUser || '.CADPRD01';
-  SET strSql = strSql || ' WHERE TRIM(VDPRDPRD_CODCIA) = ?';
+  SET strSql = strSql || ' WHERE CAST(TRIM(VDPRDPRD_CODCIA) AS INTEGER) = ?';
   PREPARE stmt3 FROM strSql;
   EXECUTE stmt3 INTO intFam, intNro USING CODIGO_PRODUTO;
   DEALLOCATE PREPARE stmt3;
