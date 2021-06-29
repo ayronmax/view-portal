@@ -92,7 +92,7 @@ BEGIN
      SET strSql = strSql || 'VDKARKAR_OCOKD,';
      SET strSql = strSql || 'VDKARKAR_USUARIO,';
      SET strSql = strSql || 'VDKARKAR_SIT,';
-     SET strSql = strSql || 'VDKARKAR_LOTE,';
+     SET strSql = strSql || 'VDKARKAR_LOTE)';
      SET strSql = strSql || ' VALUES (';
      SET strSql = strSql || CAST(intProxNro AS VARCHAR(9)) || ',';             
      SET strSql = strSql || '1' || ',';
