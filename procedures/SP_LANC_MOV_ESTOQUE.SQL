@@ -37,7 +37,7 @@ BEGIN
   DEALLOCATE PREPARE stmt2;
   
   SET intProxNro = intUltNro + 1;
-  SET strSql = 'UPDATE ' || strUser || '.NROCEN01 SET VDKARNRO_ULTNRO FROM = ' || CAST(intProxNro AS VARCHAR(9)) || ' WHERE VDKARNRO_COD = 1';  
+  SET strSql = 'UPDATE ' || strUser || '.NROCEN01 SET VDKARNRO_ULTNRO = ' || CAST(intProxNro AS VARCHAR(9)) || ' WHERE VDKARNRO_COD = 1';  
   EXECUTE IMMEDIATE strSql;
       
   SET strSql = 'SELECT VDPRDPRD_CFAM, VDPRDPRD_NRO FROM ' || strUser || '.CADPRD01';
