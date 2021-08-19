@@ -23,6 +23,7 @@ BEGIN
   DECLARE strAno VARCHAR(4);
   DECLARE strMes VARCHAR(2);
   DECLARE strDia VARCHAR(2);
+  DECLARE intQtdUn INTEGER;
    
   SET strUser = SELECT TRIM(CURRENT_USER);
   
@@ -54,10 +55,10 @@ BEGIN
      
      EXECUTE IMMEDIATE strSql;
       
-     SET strSql = 'SELECT VDPRDPRD_CFAM, VDPRDPRD_NRO FROM ' || strUser || '.CADPRD01';
-     SET strSql = strSql || ' WHERE CAST(TRIM(VDPRDPRD_CODCIA) AS INTEGER) = ?';
+     SET strSql = 'SELECT VDPRDPRD_CFAM, VDPRDPRD_NRO, VDPRDPRD_QTDUN FROM ' || strUser || '.CADPRD01';
+     SET strSql = strSql || ' WHERE CAST(TRIM(VDPRDPRD_CODCIA2) AS DECIMAL(20,0)) = ?';
      PREPARE stmt3 FROM strSql;
-     EXECUTE stmt3 INTO intFam, intNro USING CODIGO_PRODUTO;
+     EXECUTE stmt3 INTO intFam, intNro, intQtdUn USING CODIGO_PRODUTO;
      DEALLOCATE PREPARE stmt3;
        
      IF intFam IS NOT NULL THEN
@@ -118,8 +119,8 @@ BEGIN
            SET strSql = strSql || '1' || ',';
            SET strSql = strSql || CAST(intFam AS VARCHAR(4)) || ',';
            SET strSql = strSql || CAST(intNro AS VARCHAR(4)) || ',';
-           SET strSql = strSql || CAST(ENTRADAS AS VARCHAR(9)) || ',';
-           SET strSql = strSql || '0' || ',';
+           SET strSql = strSql || CAST(FIX(CAST(ENTRADAS / intQtdUn AS DECIMAL(13,3))) AS VARCHAR(20)) || ',';
+           SET strSql = strSql || CAST(RND((CAST(ENTRADAS / intQtdUn AS DECIMAL(13,3)) - FIX(CAST(ENTRADAS / intQtdUn AS DECIMAL(13,3)))) * intQtdUn) AS VARCHAR(20)) || ',';
            SET strSql = strSql || '0' || ',';
            SET strSql = strSql || REPLACE(CAST(CURDATE() AS VARCHAR(10)), '-', '') || ',';
            SET strSql = strSql || LEFT(REPLACE(CAST(CURTIME() AS VARCHAR(8)), ':', ''), 4) || ',';
