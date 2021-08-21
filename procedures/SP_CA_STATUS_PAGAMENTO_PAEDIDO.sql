@@ -1,0 +1,21 @@
+CREATE OR REPLACE PROCEDURE SP_CA_STATUS_PAGAMENTO_PEDIDO(IN NUMERO_PEDIDO VARCHAR(15),
+                                                          IN STATUS_PAG VARCHAR(2),
+                                                          OUT COD_ERRO SMALLINT,
+                                                          OUT MSG_ERRO VARCHAR(100))
+
+LANGUAGE SQL
+
+BEGIN
+  DECLARE NUM_PED VARCHAR(15);
+  
+  SET NUM_PED = SELECT VDPEDCPP_ERP_TERCEIRO FROM VDPEDCPP WHERE VDPEDCPP_ERP_TERCEIRO = NUMERO_PEDIDO;
+  
+  IF NUM_PED IS NOT NULL THEN
+     UPDATE VDPEDCPP SET VDPEDCPP_STATUS_PAGO = STATUS_PAG WHERE VDPEDCPP_ERP_TERCEIRO = NUM_PED;
+     SET COD_ERRO = 0;
+     SET MSG_ERRO = 'Status atualizado com sucesso';
+  ELSE
+     SET COD_ERRO = 1;
+     SET MSG_ERRO = 'Pedido nao localizado!';
+  END IF; 
+END;
