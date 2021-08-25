@@ -2,9 +2,7 @@ CREATE OR REPLACE PROCEDURE SP_BW_ESTOQUE_CONSOLIDADO(IN SCHEMA_MATRIZ VARCHAR(2
                                                       IN NUM_EMP_MATRIZ VARCHAR(2),
                                                       IN SCHEMA_FILIAL VARCHAR(1000),
                                                       IN NUM_EMP_FILIAL VARCHAR(500),
-                                                      IN NUM_EMP_FILIAL_CONSOLIDA VARCHAR(500),
-                                                      OUT COD_ERRO SMALLINT,
-                                                      OUT MSG_ERRO VARCHAR(100))
+                                                      IN NUM_EMP_FILIAL_CONSOLIDA VARCHAR(500))
 
 LANGUAGE SQL
 
@@ -27,6 +25,7 @@ BEGIN
   DECLARE ano SMALLINT;
   DECLARE mes SMALLINT; 
   DECLARE dia SMALLINT;
+  DECLARE tabela_matriz_consolida VARCHAR(20);
   DECLARE tabela_matriz VARCHAR(20);
   DECLARE tabela_filial VARCHAR(20); 
   DECLARE sql_create_view VARCHAR(5000);
@@ -38,6 +37,8 @@ BEGIN
   DECLARE sql_sldsaiun VARCHAR(5000);
   DECLARE sql_csttotal VARCHAR(5000);
   DECLARE sql_csttotalun VARCHAR(5000);
+  DECLARE sql_from_join VARCHAR(5000);
+  DECLARE sql_cmd VARCHAR(8000);
     
   SET schema_filial_atual = TRIM(LEFT(SCHEMA_FILIAL, LOCATE(',', SCHEMA_FILIAL, 1) - 1));
   SET schema_filial_seg = TRIM(RIGHT(SCHEMA_FILIAL, LENGTH(SCHEMA_FILIAL) - LOCATE(',', SCHEMA_FILIAL, 1)));
@@ -49,8 +50,9 @@ BEGIN
   SET ano = YEAR(data_atual);
   SET mes = MONTH(data_atual);
   SET dia = DAYOFMONTH(data_atual);
+  SET tabela_matriz_consolida = 'SC' || RIGHT(CAST(ano AS VARCHAR(4)), 2) || REPEAT('0', 2 - LENGTH(CAST(mes AS VARCHAR(2)))) || CAST(mes AS VARCHAR(2)) || NUM_EMP_MATRIZ;
   SET tabela_matriz = 'SD' || RIGHT(CAST(ano AS VARCHAR(4)), 2) || REPEAT('0', 2 - LENGTH(CAST(mes AS VARCHAR(2)))) || CAST(mes AS VARCHAR(2)) || NUM_EMP_MATRIZ;
-  SET sql_create_view = 'CREATE OR REPLACE VIEW ' || TRIM(SCHEMA_MATRIZ) || '.VDSLDCON AS SELECT ';
+  SET sql_create_view = 'CREATE OR REPLACE VIEW ' || TRIM(SCHEMA_MATRIZ) || '.' || tabela_matriz_consolida || ' AS SELECT ';
   SET sql_cprd = 'COALESCE(MATRIZ.VDKARSLD_CPRD';
   SET sql_dia = 'COALESCE(MATRIZ.VDKARSLD_DIA';
   SET sql_ocokd = 'COALESCE(MATRIZ.VDKARSLD_OCOKD';
@@ -59,7 +61,8 @@ BEGIN
   SET sql_sldsaiun = 'COALESCE(MATRIZ.VDKARSLD_SLDSAIUN,0)';
   SET sql_csttotal = 'COALESCE(MATRIZ.VDKARSLD_CSTTOTAL,0)';
   SET sql_csttotalun = 'COALESCE(MATRIZ.VDKARSLD_CSTTOTALUN,0)';
-      
+  SET sql_from_join = ' FROM ' || TRIM(SCHEMA_MATRIZ) || '.' || tabela_matriz || ' MATRIZ';
+        
   WHILE schema_filial_seg IS NOT NULL DO
     IF schema_filial_atual = NULL THEN
        SET schema_filial_atual = schema_filial_seg;
@@ -68,18 +71,18 @@ BEGIN
     END IF;
     
     SET tabela_filial = 'SD' || RIGHT(CAST(ano AS VARCHAR(4)), 2) || REPEAT('0', 2 - LENGTH(CAST(mes AS VARCHAR(2)))) || CAST(mes AS VARCHAR(2)) || num_emp_filial_atual;
-    
-    SET sql_cprd = sql_cprd || ',FILIAL' || num_emp_filial_atual || '.VDKARSLD_CPRD';
-    SET sql_dia = sql_dia || ',FILIAL' || num_emp_filial_atual || '.VDKARSLD_DIA';
-    SET sql_ocokd = sql_ocokd || ',FILIAL' || num_emp_filial_atual || '.VDKARSLD_OCOKD';
-    SET sql_sldiniun = sql_sldiniun || '+COALESCE(FILIAL' || num_emp_filial_atual || '.VDKARSLD_SLDINIUN,0)';
-    SET sql_sldentun = sql_sldentun || '+COALESCE(FILIAL' || num_emp_filial_atual || '.VDKARSLD_SLDENTUN,0)';
-    SET sql_sldsaiun = sql_sldsaiun || '+COALESCE(FILIAL' || num_emp_filial_atual || '.VDKARSLD_SLDSAIUN,0)';
-    SET sql_csttotal = sql_csttotal || '+COALESCE(FILIAL' || num_emp_filial_atual || '.VDKARSLD_CSTTOTAL,0)';
-    SET sql_csttotalun = sql_csttotalun || '+COALESCE(FILIAL' || num_emp_filial_atual || '.VDKARSLD_CSTTOTALUN,0)';
-           
-    -- Implementar aqui
-    
+    SET sql_cprd = sql_cprd || ',FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_CPRD';
+    SET sql_dia = sql_dia || ',FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_DIA';
+    SET sql_ocokd = sql_ocokd || ',FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_OCOKD';
+    SET sql_sldiniun = sql_sldiniun || '+COALESCE(FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_SLDINIUN,0)';
+    SET sql_sldentun = sql_sldentun || '+COALESCE(FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_SLDENTUN,0)';
+    SET sql_sldsaiun = sql_sldsaiun || '+COALESCE(FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_SLDSAIUN,0)';
+    SET sql_csttotal = sql_csttotal || '+COALESCE(FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_CSTTOTAL,0)';
+    SET sql_csttotalun = sql_csttotalun || '+COALESCE(FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_CSTTOTALUN,0)';
+    SET sql_from_join = sql_from_join || ' OUTER JOIN ' || schema_filial_atual || '.' || tabela_filial ||' FILIAL' || num_emp_filial_consolida_atual;
+    SET sql_from_join = sql_from_join || ' ON ' || 'MATRIZ.VDKARSLD_CPRD=' || 'FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_CPRD';
+    SET sql_from_join = sql_from_join || ' AND ' || 'MATRIZ.VDKARSLD_DIA=' || 'FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_DIA';
+    SET sql_from_join = sql_from_join || ' AND ' || 'MATRIZ.VDKARSLD_OCOKD=' || 'FILIAL' || num_emp_filial_consolida_atual || '.VDKARSLD_OCOKD';
     SET schema_filial_atual = TRIM(LEFT(schema_filial_seg, LOCATE(',', schema_filial_seg, 1) - 1));
     SET schema_filial_seg = TRIM(RIGHT(schema_filial_seg, LENGTH(schema_filial_seg) - LOCATE(',', schema_filial_seg, 1)));
     SET num_emp_filial_atual = TRIM(LEFT(num_emp_filial_seg, LOCATE(',', num_emp_filial_seg, 1) - 1));
@@ -88,9 +91,41 @@ BEGIN
     SET num_emp_filial_consolida_seg = TRIM(RIGHT(num_emp_filial_consolida_seg, LENGTH(num_emp_filial_consolida_seg) - LOCATE(',', num_emp_filial_consolida_seg, 1)));
      
     IF schema_filial_atual = NULL AND LENGTH(schema_filial_seg) = 16 THEN
+       SET schema_filial_atual = schema_filial_seg;
        SET schema_filial_seg = NULL;
     END IF;
-  END WHILE;
+  END WHILE;  
   
-  SET MSG_ERRO = sql_create_view || sql_cprd || sql_dia || sql_ocokd; 
+  SET sql_cprd = sql_cprd || ',FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_CPRD';
+  SET sql_dia = sql_dia || ',FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_DIA';
+  SET sql_ocokd = sql_ocokd || ',FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_OCOKD';
+  SET sql_sldiniun = sql_sldiniun || '+COALESCE(FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_SLDINIUN,0)';
+  SET sql_sldentun = sql_sldentun || '+COALESCE(FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_SLDENTUN,0)';
+  SET sql_sldsaiun = sql_sldsaiun || '+COALESCE(FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_SLDSAIUN,0)';
+  SET sql_csttotal = sql_csttotal || '+COALESCE(FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_CSTTOTAL,0)';
+  SET sql_csttotalun = sql_csttotalun || '+COALESCE(FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_CSTTOTALUN,0)';  
+  SET sql_from_join = sql_from_join || ' OUTER JOIN ' || schema_filial_atual || '.' || tabela_filial ||' FILIAL' || num_emp_filial_consolida_seg;
+  SET sql_from_join = sql_from_join || ' ON ' || 'MATRIZ.VDKARSLD_CPRD=' || 'FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_CPRD';
+  SET sql_from_join = sql_from_join || ' AND ' || 'MATRIZ.VDKARSLD_DIA=' || 'FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_DIA';
+  SET sql_from_join = sql_from_join || ' AND ' || 'MATRIZ.VDKARSLD_OCOKD=' || 'FILIAL' || num_emp_filial_consolida_seg || '.VDKARSLD_OCOKD';
+  SET sql_cprd = sql_cprd || ') VDSLDCON_CPRD';
+  SET sql_dia = ',' || sql_dia || ') VDSLDCON_DIA';
+  SET sql_ocokd = ',' || sql_ocokd || ') VDSLDCON_OCOKD';
+  SET sql_sldiniun = ',' || sql_sldiniun || ' VDSLDCON_SLDINIUN';
+  SET sql_sldentun = ',' || sql_sldentun || ' VDSLDCON_SLDENTUN';
+  SET sql_sldsaiun = ',' || sql_sldsaiun || ' VDSLDCON_SLDSAIUN';
+  SET sql_csttotal = ',' || sql_csttotal || ' VDSLDCON_CSTTOTAL';
+  SET sql_csttotalun = ',' || sql_csttotalun || ' VDSLDCON_CSTTOTALUN';
+      
+  set sql_cmd = sql_create_view || 
+                sql_cprd || 
+                sql_dia || 
+                sql_ocokd || 
+                sql_sldiniun || 
+                sql_sldentun || 
+                sql_sldsaiun || 
+                sql_csttotal || 
+                sql_csttotalun || 
+                sql_from_join;
+  EXECUTE IMMEDIATE sql_cmd;
 END;
